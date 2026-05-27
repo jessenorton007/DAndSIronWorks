@@ -1,7 +1,7 @@
 import { useParams, useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ExternalLink, CheckCircle } from 'lucide-react';
-import { etsyProducts } from '@/data/etsy-products';
+import { useEtsyProducts } from '@/hooks/useAdminProducts';
 import { GlassButton } from '@/components/GlassButton';
 import { Navigation } from '@/components/Navigation';
 import { FloatingContactBanner } from '@/components/FloatingContactBanner';
@@ -9,7 +9,8 @@ import { FloatingContactBanner } from '@/components/FloatingContactBanner';
 export function ProductPage() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
-  const product = etsyProducts.find(p => p.id === params.id);
+  const { products } = useEtsyProducts();
+  const product = products.find(p => p.id === params.id);
 
   if (!product) {
     return (
@@ -48,16 +49,12 @@ export function ProductPage() {
             >
               <div
                 className="aspect-square rounded-2xl overflow-hidden"
-                style={{
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,140,26,0.05)',
-                }}
+                style={{ border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,140,26,0.05)' }}
               >
-                <img
-                  src={product.image}
-                  alt={product.title}
-                  className="w-full h-full object-cover"
-                />
+                {product.image
+                  ? <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
+                  : <div className="w-full h-full bg-white/5 flex items-center justify-center"><span className="text-white/20 font-display uppercase">No image</span></div>
+                }
                 <div className="absolute inset-0 shadow-[inset_0_0_60px_rgba(0,0,0,0.3)] pointer-events-none rounded-2xl" />
               </div>
               <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-2/3 h-8 bg-orange-500/10 blur-2xl rounded-full pointer-events-none" />
@@ -79,10 +76,7 @@ export function ProductPage() {
                 {product.priceLabel}
               </div>
 
-              <div
-                className="w-full h-px mb-8"
-                style={{ background: 'linear-gradient(90deg, rgba(255,140,26,0.3), transparent)' }}
-              />
+              <div className="w-full h-px mb-8" style={{ background: 'linear-gradient(90deg, rgba(255,140,26,0.3), transparent)' }} />
 
               <p className="text-white/65 leading-relaxed mb-8 text-base font-sans">
                 {product.description}
@@ -100,12 +94,7 @@ export function ProductPage() {
               )}
 
               <div className="flex flex-col sm:flex-row gap-4 mt-auto">
-                <GlassButton
-                  href={product.etsyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 justify-center"
-                >
+                <GlassButton href={product.etsyUrl} target="_blank" rel="noopener noreferrer" className="flex-1 justify-center">
                   <ExternalLink size={16} className="mr-2" />
                   Buy on Etsy
                 </GlassButton>

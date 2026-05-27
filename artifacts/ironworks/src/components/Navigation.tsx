@@ -16,21 +16,26 @@ export function Navigation() {
 
   const scrollTo = (id: string) => {
     setMobileMenuOpen(false);
-    if (window.location.pathname !== '/' && window.location.pathname !== import.meta.env.BASE_URL.replace(/\/$/, '')) {
+    const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+    const isHome = window.location.pathname === '/' || window.location.pathname === base || window.location.pathname === base + '/';
+    if (!isHome) {
       navigate('/');
-      setTimeout(() => {
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+      setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 120);
       return;
     }
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const goContact = () => {
+    setMobileMenuOpen(false);
+    navigate('/contact');
+  };
+
   const navLinks = [
-    { name: 'Custom Designs', id: 'custom-designs' },
-    { name: 'Shop', id: 'shop' },
-    { name: 'Premium', id: 'premium' },
-    { name: 'Contact', id: 'contact' },
+    { name: 'Custom Designs', action: () => scrollTo('custom-designs') },
+    { name: 'Shop', action: () => scrollTo('shop') },
+    { name: 'Premium', action: () => scrollTo('premium') },
+    { name: 'Contact', action: goContact },
   ];
 
   return (
@@ -39,7 +44,7 @@ export function Navigation() {
         <div
           className="mx-auto max-w-5xl rounded-full flex items-center justify-between px-5 py-3 transition-all duration-300"
           style={{
-            background: scrolled ? 'rgba(14,10,6,0.82)' : 'rgba(14,10,6,0.55)',
+            background: scrolled ? 'rgba(14,10,6,0.88)' : 'rgba(14,10,6,0.55)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
             border: '1px solid rgba(255,255,255,0.1)',
@@ -48,7 +53,7 @@ export function Navigation() {
               : '0 4px 24px rgba(0,0,0,0.3)',
           }}
         >
-          <div className="flex-shrink-0 cursor-pointer" onClick={() => scrollTo('hero')}>
+          <div className="flex-shrink-0 cursor-pointer" onClick={() => navigate('/')}>
             <img
               src="/brand/logo.png"
               alt="D&S Iron Works"
@@ -70,8 +75,8 @@ export function Navigation() {
           <div className="hidden md:flex items-center gap-7">
             {navLinks.map((link) => (
               <button
-                key={link.id}
-                onClick={() => scrollTo(link.id)}
+                key={link.name}
+                onClick={link.action}
                 className="nav-link text-sm font-display font-medium tracking-widest uppercase"
               >
                 {link.name}
@@ -101,7 +106,7 @@ export function Navigation() {
             <div
               className="rounded-2xl p-5 flex flex-col gap-1"
               style={{
-                background: 'rgba(14,10,6,0.92)',
+                background: 'rgba(14,10,6,0.96)',
                 backdropFilter: 'blur(24px)',
                 border: '1px solid rgba(255,255,255,0.1)',
                 boxShadow: '0 16px 48px rgba(0,0,0,0.6)',
@@ -109,8 +114,8 @@ export function Navigation() {
             >
               {navLinks.map((link) => (
                 <button
-                  key={link.id}
-                  onClick={() => scrollTo(link.id)}
+                  key={link.name}
+                  onClick={link.action}
                   className="nav-link text-left text-lg font-display tracking-widest uppercase py-3 border-b border-white/5 last:border-0"
                 >
                   {link.name}

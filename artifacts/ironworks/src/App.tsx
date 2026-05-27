@@ -5,6 +5,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import { Home } from "@/pages/Home";
 import { ProductPage } from "@/pages/ProductPage";
+import { ContactPage } from "@/pages/ContactPage";
+import { AdminPanel } from "@/pages/AdminPanel";
+import { AdminGear } from "@/components/AdminGear";
 
 const queryClient = new QueryClient();
 
@@ -13,6 +16,8 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/shop/:id" component={ProductPage} />
+      <Route path="/contact" component={ContactPage} />
+      <Route path="/admin" component={AdminPanel} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -24,6 +29,7 @@ function App() {
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <Router />
+          <AdminGear />
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
