@@ -357,6 +357,11 @@ export function Home() {
                       className="w-full h-full object-cover opacity-85 group-hover:opacity-100"
                       style={{ transition: 'transform 0.5s ease, opacity 0.3s ease' }}
                     />
+                    {product.badge && (
+                      <div className="absolute top-2.5 left-2.5 bg-black/75 backdrop-blur-sm text-orange-400 text-[10px] font-display tracking-widest uppercase px-3 py-1 rounded-full border border-orange-500/30 pointer-events-none">
+                        {product.badge}
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
                       <span className="font-display text-sm uppercase tracking-widest text-white border border-white/30 rounded-full px-5 py-2.5 bg-white/5">
                         View Details

@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
-import { EtsyProduct } from '@/data/etsy-products';
-import { PremiumProduct } from '@/data/premium-products';
+import { EtsyProduct, defaultEtsyProducts } from '@/data/etsy-products';
+import { PremiumProduct, defaultPremiumProducts } from '@/data/premium-products';
 
-const ETSY_KEY = 'ds_etsy_products';
-const PREMIUM_KEY = 'ds_premium_products';
+const ETSY_KEY = 'ds_etsy_products_v2';
+const PREMIUM_KEY = 'ds_premium_products_v2';
 const ORDERS_KEY = 'ds_orders';
 const INQUIRIES_KEY = 'ds_inquiries';
 
@@ -40,7 +40,7 @@ function readStorage<T>(key: string, fallback: T): T {
 
 export function useEtsyProducts() {
   const [products, setProductsState] = useState<EtsyProduct[]>(() =>
-    readStorage<EtsyProduct[]>(ETSY_KEY, [])
+    readStorage<EtsyProduct[]>(ETSY_KEY, defaultEtsyProducts)
   );
 
   const setProducts = useCallback((updated: EtsyProduct[]) => {
@@ -49,16 +49,16 @@ export function useEtsyProducts() {
   }, []);
 
   const addProduct = useCallback((p: EtsyProduct) => {
-    setProducts([...readStorage<EtsyProduct[]>(ETSY_KEY, []), p]);
+    setProducts([...readStorage<EtsyProduct[]>(ETSY_KEY, defaultEtsyProducts), p]);
   }, [setProducts]);
 
   const updateProduct = useCallback((p: EtsyProduct) => {
-    const all = readStorage<EtsyProduct[]>(ETSY_KEY, []);
+    const all = readStorage<EtsyProduct[]>(ETSY_KEY, defaultEtsyProducts);
     setProducts(all.map(x => x.id === p.id ? p : x));
   }, [setProducts]);
 
   const removeProduct = useCallback((id: string) => {
-    const all = readStorage<EtsyProduct[]>(ETSY_KEY, []);
+    const all = readStorage<EtsyProduct[]>(ETSY_KEY, defaultEtsyProducts);
     setProducts(all.filter(x => x.id !== id));
   }, [setProducts]);
 
@@ -67,7 +67,7 @@ export function useEtsyProducts() {
 
 export function usePremiumProducts() {
   const [products, setProductsState] = useState<PremiumProduct[]>(() =>
-    readStorage<PremiumProduct[]>(PREMIUM_KEY, [])
+    readStorage<PremiumProduct[]>(PREMIUM_KEY, defaultPremiumProducts)
   );
 
   const setProducts = useCallback((updated: PremiumProduct[]) => {
@@ -76,16 +76,16 @@ export function usePremiumProducts() {
   }, []);
 
   const addProduct = useCallback((p: PremiumProduct) => {
-    setProducts([...readStorage<PremiumProduct[]>(PREMIUM_KEY, []), p]);
+    setProducts([...readStorage<PremiumProduct[]>(PREMIUM_KEY, defaultPremiumProducts), p]);
   }, [setProducts]);
 
   const updateProduct = useCallback((p: PremiumProduct) => {
-    const all = readStorage<PremiumProduct[]>(PREMIUM_KEY, []);
+    const all = readStorage<PremiumProduct[]>(PREMIUM_KEY, defaultPremiumProducts);
     setProducts(all.map(x => x.id === p.id ? p : x));
   }, [setProducts]);
 
   const removeProduct = useCallback((id: string) => {
-    const all = readStorage<PremiumProduct[]>(PREMIUM_KEY, []);
+    const all = readStorage<PremiumProduct[]>(PREMIUM_KEY, defaultPremiumProducts);
     setProducts(all.filter(x => x.id !== id));
   }, [setProducts]);
 

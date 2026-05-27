@@ -58,29 +58,29 @@
   --app-font-mono: Menlo, monospace;
   --radius: 1.5rem;
 
-  --background: 0 0% 8%;
+  --background: 0 0% 13%;
   --foreground: 0 0% 96%;
 
-  --border: 0 0% 18%;
-  --input: 0 0% 18%;
+  --border: 0 0% 23%;
+  --input: 0 0% 23%;
   --ring: 24 100% 50%;
 
-  --card: 0 0% 11%;
+  --card: 0 0% 17%;
   --card-foreground: 0 0% 96%;
-  --card-border: 0 0% 16%;
+  --card-border: 0 0% 22%;
 
-  --popover: 0 0% 11%;
+  --popover: 0 0% 17%;
   --popover-foreground: 0 0% 96%;
-  --popover-border: 0 0% 16%;
+  --popover-border: 0 0% 22%;
 
   --primary: 24 100% 50%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 0 0% 16%;
+  --secondary: 0 0% 21%;
   --secondary-foreground: 0 0% 96%;
 
-  --muted: 0 0% 16%;
-  --muted-foreground: 0 0% 60%;
+  --muted: 0 0% 21%;
+  --muted-foreground: 0 0% 65%;
 
   --accent: 24 100% 50%;
   --accent-foreground: 0 0% 100%;
@@ -90,29 +90,29 @@
 }
 
 .dark {
-  --background: 0 0% 8%;
+  --background: 0 0% 13%;
   --foreground: 0 0% 96%;
 
-  --border: 0 0% 18%;
-  --input: 0 0% 18%;
+  --border: 0 0% 23%;
+  --input: 0 0% 23%;
   --ring: 24 100% 50%;
 
-  --card: 0 0% 11%;
+  --card: 0 0% 17%;
   --card-foreground: 0 0% 96%;
-  --card-border: 0 0% 16%;
+  --card-border: 0 0% 22%;
 
-  --popover: 0 0% 11%;
+  --popover: 0 0% 17%;
   --popover-foreground: 0 0% 96%;
-  --popover-border: 0 0% 16%;
+  --popover-border: 0 0% 22%;
 
   --primary: 24 100% 50%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 0 0% 16%;
+  --secondary: 0 0% 21%;
   --secondary-foreground: 0 0% 96%;
 
-  --muted: 0 0% 16%;
-  --muted-foreground: 0 0% 60%;
+  --muted: 0 0% 21%;
+  --muted-foreground: 0 0% 65%;
 
   --accent: 24 100% 50%;
   --accent-foreground: 0 0% 100%;

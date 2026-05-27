@@ -66,8 +66,13 @@ export function ProductPage() {
               transition={{ duration: 0.5, delay: 0.15 }}
               className="flex flex-col"
             >
-              <div className="mb-2">
+              <div className="mb-3 flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-display tracking-widest uppercase text-orange-400/70">Hand-Forged</span>
+                {product.badge && (
+                  <span className="text-[10px] font-display tracking-widest uppercase text-orange-400 bg-orange-500/10 border border-orange-500/25 rounded-full px-3 py-1">
+                    {product.badge}
+                  </span>
+                )}
               </div>
               <h1 className="font-display text-4xl md:text-5xl tracking-wider text-white mb-4 leading-tight">
                 {product.title}
