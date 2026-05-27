@@ -4,7 +4,7 @@ import { useLocation } from 'wouter';
 import {
   LayoutDashboard, ShoppingBag, Gem, MessageSquare,
   ClipboardList, Settings, LogOut, Plus, Pencil,
-  Trash2, X, Upload, ExternalLink, ChevronDown, ChevronUp, Check
+  Trash2, X, Upload, ExternalLink, ChevronDown, ChevronUp, Check, BarChart2
 } from 'lucide-react';
 import {
   useEtsyProducts, usePremiumProducts,
@@ -13,10 +13,11 @@ import {
 } from '@/hooks/useAdminProducts';
 import { EtsyProduct } from '@/data/etsy-products';
 import { PremiumProduct } from '@/data/premium-products';
+import { AnalyticsTab } from './AnalyticsTab';
 
 const SESSION_KEY = 'ds_admin_auth';
 
-type Tab = 'overview' | 'etsy' | 'premium' | 'inquiries' | 'orders' | 'settings';
+type Tab = 'overview' | 'etsy' | 'premium' | 'inquiries' | 'orders' | 'analytics' | 'settings';
 
 const SETTINGS_KEY = 'ds_site_settings';
 interface SiteSettings { phone: string; email: string; facebook: string; }
@@ -57,7 +58,7 @@ function ImageField({ value, onChange }: { value: string; onChange: (v: string) 
       </div>
       {mode === 'url' ? (
         <input type="text" value={value.startsWith('data:') ? '' : value} onChange={e => onChange(e.target.value)}
-          placeholder="https://... or /images/filename.jpg"
+          placeholder="https://... or /products/filename.jpg"
           className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
       ) : (
         <div>
@@ -94,28 +95,28 @@ function EtsyForm({ initial, onSave, onClose }: { initial: EtsyProduct | null; o
     <form onSubmit={submit} className="flex flex-col gap-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="label-sm">Title *</label>
+          <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Title *</label>
           <input required value={f.title} onChange={e => set('title', e.target.value)} placeholder="Hand-Forged Hook" className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
         </div>
         <div>
-          <label className="label-sm">Price *</label>
+          <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Price *</label>
           <input required value={f.priceLabel} onChange={e => set('priceLabel', e.target.value)} placeholder="$45.00" className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
         </div>
       </div>
       <div>
-        <label className="label-sm">Product Image</label>
+        <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Product Image</label>
         <ImageField value={f.image} onChange={v => set('image', v)} />
       </div>
       <div>
-        <label className="label-sm">Etsy Product URL</label>
+        <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Etsy Product URL</label>
         <input value={f.etsyUrl} onChange={e => set('etsyUrl', e.target.value)} placeholder="https://www.etsy.com/listing/..." className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
       </div>
       <div>
-        <label className="label-sm">Description *</label>
+        <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Description *</label>
         <textarea required rows={3} value={f.description} onChange={e => set('description', e.target.value)} placeholder="Describe the product..." className={inputCls('resize-none')} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
       </div>
       <div>
-        <label className="label-sm">Specs / Details <span className="text-white/25 normal-case font-sans tracking-normal">(one per line)</span></label>
+        <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Specs / Details <span className="text-white/25 normal-case font-sans tracking-normal">(one per line)</span></label>
         <textarea rows={3} value={detailsText} onChange={e => setDetailsText(e.target.value)} placeholder={"Solid iron bar stock\nHand-hammered finish\nBeeswax rust protection"} className={inputCls('resize-none')} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
       </div>
       <div className="flex gap-3 pt-2">
@@ -143,20 +144,20 @@ function PremiumForm({ initial, onSave, onClose }: { initial: PremiumProduct | n
     <form onSubmit={submit} className="flex flex-col gap-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="label-sm">Title *</label>
+          <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Title *</label>
           <input required value={f.title} onChange={e => set('title', e.target.value)} placeholder="Custom Fire Pit" className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
         </div>
         <div>
-          <label className="label-sm">Price *</label>
+          <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Price *</label>
           <input required value={f.priceLabel} onChange={e => set('priceLabel', e.target.value)} placeholder="$1,200.00" className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
         </div>
       </div>
       <div>
-        <label className="label-sm">Product Image</label>
+        <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Product Image</label>
         <ImageField value={f.image} onChange={v => set('image', v)} />
       </div>
       <div>
-        <label className="label-sm">Description *</label>
+        <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Description *</label>
         <textarea required rows={4} value={f.description} onChange={e => set('description', e.target.value)} placeholder="Describe this signature piece..." className={inputCls('resize-none')} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
       </div>
       <div className="flex gap-3 pt-2">
@@ -283,6 +284,7 @@ export function AdminPanel() {
     { id: 'premium', label: 'Signature Pieces', icon: Gem, badge: premiumProducts.length },
     { id: 'inquiries', label: 'Inquiries', icon: MessageSquare, badge: inquiries.length },
     { id: 'orders', label: 'Orders', icon: ClipboardList, badge: orders.length },
+    { id: 'analytics', label: 'Analytics', icon: BarChart2 },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -533,6 +535,9 @@ export function AdminPanel() {
             </div>
           )}
 
+          {/* ANALYTICS */}
+          {tab === 'analytics' && <AnalyticsTab />}
+
           {/* SETTINGS */}
           {tab === 'settings' && (
             <div>
@@ -540,15 +545,15 @@ export function AdminPanel() {
               <div className="max-w-lg rounded-xl p-8" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <div className="flex flex-col gap-5">
                   <div>
-                    <label className="label-sm">Phone Number</label>
+                    <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Phone Number</label>
                     <input value={settings.phone} onChange={e => setSettings(s => ({ ...s, phone: e.target.value }))} className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
                   </div>
                   <div>
-                    <label className="label-sm">Email</label>
+                    <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Email</label>
                     <input value={settings.email} onChange={e => setSettings(s => ({ ...s, email: e.target.value }))} className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
                   </div>
                   <div>
-                    <label className="label-sm">Facebook Handle</label>
+                    <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Facebook Handle</label>
                     <input value={settings.facebook} onChange={e => setSettings(s => ({ ...s, facebook: e.target.value }))} className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
                   </div>
                   <button onClick={saveSettings} className="flex items-center justify-center gap-2 py-3 rounded-lg font-display uppercase tracking-widest text-sm text-white transition-all mt-2"

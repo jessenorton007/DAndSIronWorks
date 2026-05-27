@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -8,6 +9,7 @@ import { ProductPage } from "@/pages/ProductPage";
 import { ContactPage } from "@/pages/ContactPage";
 import { AdminPanel } from "@/pages/AdminPanel";
 import { AdminGear } from "@/components/AdminGear";
+import { init as initTracker } from "@/analytics/tracker";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +26,10 @@ function Router() {
 }
 
 function App() {
+  useEffect(() => {
+    initTracker();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
