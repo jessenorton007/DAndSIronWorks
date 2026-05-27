@@ -1,25 +1,29 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 export function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [, navigate] = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const scrollTo = (id: string) => {
     setMobileMenuOpen(false);
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+    if (window.location.pathname !== '/' && window.location.pathname !== import.meta.env.BASE_URL.replace(/\/$/, '')) {
+      navigate('/');
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      return;
     }
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const navLinks = [
@@ -30,71 +34,84 @@ export function Navigation() {
   ];
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'py-4' : 'py-6'
-      }`}
-    >
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'py-3' : 'py-5'}`}>
       <div className="container mx-auto px-4 md:px-8">
-        <div className="mx-auto max-w-5xl rounded-full backdrop-blur-md bg-black/40 border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)] px-6 py-3 flex items-center justify-between">
+        <div
+          className="mx-auto max-w-5xl rounded-full flex items-center justify-between px-5 py-3 transition-all duration-300"
+          style={{
+            background: scrolled ? 'rgba(14,10,6,0.82)' : 'rgba(14,10,6,0.55)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            boxShadow: scrolled
+              ? '0 4px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)'
+              : '0 4px 24px rgba(0,0,0,0.3)',
+          }}
+        >
           <div className="flex-shrink-0 cursor-pointer" onClick={() => scrollTo('hero')}>
-            <img 
-              src="/brand/logo.png" 
-              alt="Ironworks Logo" 
-              className="h-8 w-auto invert opacity-90 brightness-150"
+            <img
+              src="/brand/logo.png"
+              alt="D&S Iron Works"
+              className="h-12 w-auto"
+              style={{ filter: 'invert(1) brightness(1.4) drop-shadow(0 0 8px rgba(255,140,26,0.2))' }}
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 const parent = e.currentTarget.parentElement;
                 if (parent && !parent.querySelector('span')) {
                   const span = document.createElement('span');
                   span.className = 'font-display font-bold text-xl tracking-wider text-white';
-                  span.innerText = 'IRONWORKS';
+                  span.innerText = 'D&S IRON WORKS';
                   parent.appendChild(span);
                 }
               }}
             />
           </div>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-7">
             {navLinks.map((link) => (
               <button
                 key={link.id}
                 onClick={() => scrollTo(link.id)}
-                className="text-sm font-medium tracking-widest uppercase text-white/70 hover:text-white transition-colors hover:text-forge-gradient"
+                className="nav-link text-sm font-display font-medium tracking-widest uppercase"
               >
                 {link.name}
               </button>
             ))}
           </div>
 
-          {/* Mobile Menu Toggle */}
           <div className="md:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-white/70 hover:text-white"
+              className="p-2 text-white/70 hover:text-white transition-colors"
             >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Nav Dropdown */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute top-full left-0 right-0 mt-4 px-4 md:hidden"
+            exit={{ opacity: 0, y: -12 }}
+            className="absolute top-full left-0 right-0 mt-3 px-4 md:hidden z-50"
           >
-            <div className="rounded-2xl backdrop-blur-xl bg-black/80 border border-white/10 shadow-2xl p-6 flex flex-col gap-4">
+            <div
+              className="rounded-2xl p-5 flex flex-col gap-1"
+              style={{
+                background: 'rgba(14,10,6,0.92)',
+                backdropFilter: 'blur(24px)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                boxShadow: '0 16px 48px rgba(0,0,0,0.6)',
+              }}
+            >
               {navLinks.map((link) => (
                 <button
                   key={link.id}
                   onClick={() => scrollTo(link.id)}
-                  className="text-left text-lg font-display tracking-widest uppercase text-white hover:text-primary transition-colors py-2 border-b border-white/5 last:border-0"
+                  className="nav-link text-left text-lg font-display tracking-widest uppercase py-3 border-b border-white/5 last:border-0"
                 >
                   {link.name}
                 </button>

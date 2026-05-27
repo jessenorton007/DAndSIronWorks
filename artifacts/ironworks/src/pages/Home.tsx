@@ -1,178 +1,246 @@
 import { useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useLocation } from "wouter";
 import { Navigation } from "@/components/Navigation";
 import { Embers } from "@/components/Embers";
 import { GlassButton } from "@/components/GlassButton";
 import { CheckoutModal } from "@/components/CheckoutModal";
+import { FloatingContactBanner } from "@/components/FloatingContactBanner";
 import { etsyProducts } from "@/data/etsy-products";
 import { premiumProducts, PremiumProduct } from "@/data/premium-products";
 
 export function Home() {
   const { scrollYProgress } = useScroll();
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 1.05]);
-
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.22], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.22], [1, 1.06]);
   const [checkoutProduct, setCheckoutProduct] = useState<PremiumProduct | null>(null);
+  const [, navigate] = useLocation();
 
-  const scrollToSection = (id: string) => {
+  const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-primary/30 overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 overflow-x-hidden">
       <Navigation />
       <Embers />
+      <FloatingContactBanner />
 
-      {/* Hero Section */}
-      <section id="hero" className="relative h-screen flex flex-col items-center justify-center overflow-hidden">
-        <motion.div 
+      {/* ── HERO ─────────────────────────────────────────────────────── */}
+      <section id="hero" className="relative h-screen flex items-center overflow-hidden">
+        <motion.div
           className="absolute inset-0 z-0"
           style={{ opacity: heroOpacity, scale: heroScale }}
         >
-          <div className="absolute inset-0 bg-black/60 z-10" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black z-10" />
-          <img 
-            src="/images/hero-bg.png" 
-            alt="Forge interior" 
-            className="w-full h-full object-cover"
+          <div className="absolute inset-0 bg-[#0d0a07]/70 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/90 z-10" />
+          <img
+            src="/images/hero-bg.png"
+            alt="Forge interior"
+            className="w-full h-full object-cover object-center"
           />
         </motion.div>
 
-        <div className="relative z-10 container mx-auto px-4 flex flex-col items-center text-center">
-          <motion.img 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
-            src="/brand/logo.png" 
-            alt="Ironworks" 
-            className="h-24 md:h-32 mb-8 invert opacity-90 brightness-150 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
-          />
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+        <div className="relative z-10 container mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="max-w-xl">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1 }}
+              className="mb-3"
+            >
+              <span className="text-xs font-display tracking-[0.3em] uppercase text-orange-400/80">
+                D &amp; S Iron Works — Dallan Goff
+              </span>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.25 }}
+              className="font-display text-6xl md:text-7xl lg:text-8xl tracking-widest uppercase text-white leading-none mb-6"
+            >
+              Forged<br />
+              in <span className="text-forge-gradient" style={{ textShadow: '0 0 40px rgba(255,77,0,0.35)' }}>Fire</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.9, delay: 0.45 }}
+              className="text-white/60 text-lg leading-relaxed mb-10 font-sans font-light max-w-md"
+            >
+              Bespoke metal craft, architectural ironwork, and heavy steel made beautiful.
+              Raw, confident, built to last generations.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.65 }}
+              className="flex flex-wrap gap-4"
+            >
+              <GlassButton onClick={() => scrollTo('custom-designs')}>
+                View Custom Work
+              </GlassButton>
+              <GlassButton onClick={() => scrollTo('shop')} className="bg-white/3">
+                Shop Now
+              </GlassButton>
+            </motion.div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, delay: 0.4 }}
-            className="font-display text-5xl md:text-7xl lg:text-8xl tracking-widest uppercase text-white mb-6 drop-shadow-2xl max-w-4xl"
+            className="hidden lg:flex flex-col items-end gap-4"
           >
-            Forged in <span className="text-forge-gradient font-bold drop-shadow-[0_0_30px_rgba(255,77,0,0.5)]">Fire</span>
-          </motion.h1>
-          <motion.p 
+            <div
+              className="relative w-64 h-64 rounded-2xl overflow-hidden"
+              style={{ border: '1px solid rgba(255,140,26,0.15)', boxShadow: '0 24px 80px rgba(0,0,0,0.5)' }}
+            >
+              <img src="/images/portfolio-gate.png" alt="Custom Gate" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute bottom-3 left-3 text-xs font-display tracking-widest uppercase text-white/70">Architectural Gates</div>
+            </div>
+            <div
+              className="relative w-48 h-48 rounded-2xl overflow-hidden self-start ml-12"
+              style={{ border: '1px solid rgba(255,140,26,0.12)', boxShadow: '0 16px 60px rgba(0,0,0,0.4)' }}
+            >
+              <img src="/images/portfolio-fireplace.png" alt="Custom Fireplace" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute bottom-3 left-3 text-xs font-display tracking-widest uppercase text-white/70">Fireplaces</div>
+            </div>
+            <div
+              className="relative w-56 h-40 rounded-2xl overflow-hidden"
+              style={{ border: '1px solid rgba(255,140,26,0.1)', boxShadow: '0 12px 48px rgba(0,0,0,0.4)' }}
+            >
+              <img src="/images/portfolio-railing.png" alt="Railings" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute bottom-3 left-3 text-xs font-display tracking-widest uppercase text-white/70">Forged Railings</div>
+            </div>
+          </motion.div>
+        </div>
+
+        <div className="absolute bottom-8 left-0 right-0 flex justify-center z-10">
+          <motion.button
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.6 }}
-            className="text-lg md:text-xl text-white/70 max-w-2xl mb-12"
+            transition={{ delay: 1.2 }}
+            onClick={() => scrollTo('custom-designs')}
+            className="flex flex-col items-center gap-2 text-white/30 hover:text-white/60 transition-colors"
           >
-            Bespoke metal craft, architectural ironwork, and heavy steel made beautiful. 
-            Raw, confident, and handcrafted.
-          </motion.p>
+            <span className="text-xs font-display tracking-widest uppercase">Scroll</span>
+            <motion.div
+              animate={{ y: [0, 6, 0] }}
+              transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
+              className="w-px h-8 bg-gradient-to-b from-white/40 to-transparent"
+            />
+          </motion.button>
+        </div>
+      </section>
+
+      {/* ── CUSTOM DESIGNS ───────────────────────────────────────────── */}
+      <section id="custom-designs" className="relative py-32 z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent pointer-events-none" />
+        <div className="container mx-auto px-6 md:px-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+            <div>
+              <span className="text-xs font-display tracking-[0.3em] uppercase text-orange-400/70 block mb-3">
+                The Heart of the Shop
+              </span>
+              <h2 className="font-display text-5xl md:text-6xl tracking-widest uppercase leading-none">
+                <span className="text-forge-gradient">Bespoke</span><br />Craft
+              </h2>
+            </div>
+            <p className="text-white/50 max-w-sm font-sans font-light leading-relaxed">
+              Custom gates, sculptural fireplaces, architectural railings, and one-of-a-kind metalwork.
+              Each piece is heavy, honest, and built to last generations.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
+            {[
+              { src: '/images/portfolio-gate.png', label: 'Architectural Gates', desc: 'Custom entry gates, driveway gates, and garden arches' },
+              { src: '/images/portfolio-fireplace.png', label: 'Heavy Steel Fireplaces', desc: 'Indoor and outdoor custom fireplace surrounds and inserts' },
+              { src: '/images/portfolio-railing.png', label: 'Forged Railings', desc: 'Stair railings, balcony guards, and interior handrails' },
+              { src: '/images/portfolio-sculpture.png', label: 'Abstract Sculpture', desc: 'Site-specific sculptural commissions for any space' },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ delay: i * 0.1 }}
+                className="group relative aspect-[4/3] overflow-hidden rounded-xl"
+                style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+              >
+                <img
+                  src={item.src}
+                  alt={item.label}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                  <h3 className="font-display text-xl uppercase tracking-wider text-white mb-1">{item.label}</h3>
+                  <p className="text-white/50 text-sm font-sans opacity-0 group-hover:opacity-100 transition-opacity duration-300">{item.desc}</p>
+                </div>
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none"
+                  style={{ boxShadow: 'inset 0 0 0 1px rgba(255,140,26,0.2)' }} />
+              </motion.div>
+            ))}
+          </div>
+
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.8 }}
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="relative rounded-2xl px-8 py-12 md:py-16 md:px-16 overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,77,0,0.06) 0%, rgba(14,10,6,0.8) 60%)',
+              border: '1px solid rgba(255,140,26,0.18)',
+            }}
           >
-            <GlassButton onClick={() => scrollToSection('custom-designs')}>
-              View Custom Work
-            </GlassButton>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,77,0,0.12),transparent_60%)] pointer-events-none" />
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+              <div className="max-w-xl">
+                <h3 className="font-display text-3xl md:text-4xl tracking-widest uppercase text-white mb-4">
+                  Commission a Piece
+                </h3>
+                <p className="text-white/55 font-sans font-light leading-relaxed">
+                  Discuss your project directly with Dallan. We take on select bespoke commissions —
+                  bring your idea, a photo, a sketch, or just a feeling, and we'll build it.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 text-center shrink-0">
+                <p className="text-xs font-display tracking-widest uppercase text-orange-400/60 mb-2">
+                  Talk to Dallan directly
+                </p>
+                <div className="text-2xl font-display tracking-wider text-white">
+                  (435) 421-9033
+                </div>
+                <p className="text-xs text-white/30 font-sans">Call or text — goes straight to the forge</p>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Custom Designs Section */}
-      <section id="custom-designs" className="relative py-32 bg-black z-10">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-20">
-            <h2 className="font-display text-4xl md:text-6xl tracking-widest uppercase mb-4">
-              <span className="text-forge-gradient">Bespoke</span> Craft
-            </h2>
-            <p className="text-white/60 max-w-2xl mx-auto">
-              We design and forge custom gates, sculptural fireplaces, architectural railings, and unique metalwork. Each piece is heavy, honest, and built to last generations.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              className="group relative aspect-[4/3] overflow-hidden rounded-sm border border-white/10"
-            >
-              <img src="/images/portfolio-gate.png" alt="Custom Gate" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8">
-                <h3 className="font-display text-2xl uppercase tracking-wider text-white">Architectural Gates</h3>
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ delay: 0.2 }}
-              className="group relative aspect-[4/3] overflow-hidden rounded-sm border border-white/10"
-            >
-              <img src="/images/portfolio-fireplace.png" alt="Custom Fireplace" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8">
-                <h3 className="font-display text-2xl uppercase tracking-wider text-white">Heavy Steel Fireplaces</h3>
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              className="group relative aspect-[4/3] overflow-hidden rounded-sm border border-white/10"
-            >
-              <img src="/images/portfolio-railing.png" alt="Custom Railing" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8">
-                <h3 className="font-display text-2xl uppercase tracking-wider text-white">Forged Railings</h3>
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ delay: 0.2 }}
-              className="group relative aspect-[4/3] overflow-hidden rounded-sm border border-white/10"
-            >
-              <img src="/images/portfolio-sculpture.png" alt="Abstract Sculpture" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8">
-                <h3 className="font-display text-2xl uppercase tracking-wider text-white">Abstract Sculpture</h3>
-              </div>
-            </motion.div>
-          </div>
-
-          <div className="max-w-4xl mx-auto text-center border-t border-b border-white/10 py-16">
-            <h3 className="font-display text-3xl tracking-widest uppercase mb-6">Commission a Piece</h3>
-            <p className="text-white/60 mb-10 max-w-xl mx-auto">
-              Discuss your project directly with the owner. We take on select bespoke commissions for discerning clients.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              <GlassButton as="a" href="tel:+15555555555" className="w-full sm:w-auto min-w-[200px]">
-                Call
-              </GlassButton>
-              <GlassButton as="a" href="sms:+15555555555" className="w-full sm:w-auto min-w-[200px]">
-                Text
-              </GlassButton>
-            </div>
-            <p className="text-xs text-white/40 mt-6 tracking-wide uppercase">
-              Calls and texts go directly to the forge floor
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Premium Pre-Made */}
-      <section id="premium" className="relative py-32 bg-zinc-950 z-10 border-t border-white/5">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,77,0,0.03)_0%,transparent_70%)]" />
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+      {/* ── PREMIUM PRE-MADE ─────────────────────────────────────────── */}
+      <section id="premium" className="relative py-32 z-10 border-t border-white/5">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,77,0,0.04)_0%,transparent_65%)] pointer-events-none" />
+        <div className="container mx-auto px-6 md:px-12 relative z-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
             <div>
-              <h2 className="font-display text-4xl md:text-5xl tracking-widest uppercase mb-4">
+              <span className="text-xs font-display tracking-[0.3em] uppercase text-orange-400/70 block mb-3">Ready to Order</span>
+              <h2 className="font-display text-5xl md:text-6xl tracking-widest uppercase leading-none">
                 Signature <span className="text-forge-gradient">Pieces</span>
               </h2>
-              <p className="text-white/60 max-w-xl">
-                Heavy, high-end works available for immediate order. Secure checkout via QuickBooks coming soon.
-              </p>
             </div>
+            <p className="text-white/50 max-w-sm font-sans font-light">
+              Heavy, high-end works available now. Secure checkout coming soon via QuickBooks.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -183,25 +251,35 @@ export function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-black border border-white/10 rounded-xl overflow-hidden flex flex-col group hover:border-white/20 transition-colors"
+                className="group flex flex-col rounded-xl overflow-hidden"
+                style={{
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  transition: 'border-color 0.3s, box-shadow 0.3s',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,140,26,0.2)';
+                  (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 48px rgba(255,77,0,0.1)';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.08)';
+                  (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+                }}
               >
-                <div className="aspect-[4/3] overflow-hidden relative border-b border-white/10">
-                  <img 
-                    src={product.image} 
-                    alt={product.title} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 grayscale-[20%] group-hover:grayscale-0" 
+                <div className="aspect-[4/3] overflow-hidden relative">
+                  <img
+                    src={product.image}
+                    alt={product.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] pointer-events-none" />
+                  <div className="absolute inset-0 shadow-[inset_0_0_60px_rgba(0,0,0,0.4)] pointer-events-none" />
                 </div>
-                <div className="p-8 flex flex-col flex-1">
-                  <h3 className="font-display text-2xl uppercase tracking-wider text-white mb-2">{product.title}</h3>
-                  <p className="text-white/60 text-sm mb-8 flex-1">{product.description}</p>
+                <div className="p-7 flex flex-col flex-1">
+                  <h3 className="font-display text-xl uppercase tracking-wider text-white mb-2">{product.title}</h3>
+                  <p className="text-white/50 text-sm mb-6 flex-1 font-sans leading-relaxed">{product.description}</p>
                   <div className="flex items-center justify-between mt-auto">
-                    <span className="font-display text-xl tracking-wider text-forge-gradient">{product.priceLabel}</span>
-                    <GlassButton 
-                      onClick={() => setCheckoutProduct(product)}
-                      className="px-6 py-2 text-sm"
-                    >
+                    <span className="font-display text-2xl tracking-wider text-forge-gradient">{product.priceLabel}</span>
+                    <GlassButton onClick={() => setCheckoutProduct(product)} className="px-5 py-2.5 text-sm">
                       Order
                     </GlassButton>
                   </div>
@@ -212,49 +290,68 @@ export function Home() {
         </div>
       </section>
 
-      {/* Etsy Shop Section */}
-      <section id="shop" className="relative py-32 bg-black z-10 border-t border-white/5">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="font-display text-4xl md:text-5xl tracking-widest uppercase mb-4">
-              Forge <span className="text-forge-gradient">Goods</span>
-            </h2>
-            <p className="text-white/60 max-w-xl mx-auto mb-8">
-              Small batch hand-forged goods. Iron candle holders, hooks, brackets, and home accents.
-            </p>
-            <div className="inline-block bg-white/5 border border-white/10 rounded-full px-4 py-2">
-              <p className="text-xs tracking-wider text-white/50 uppercase">
-                Live Etsy sync coming soon — products shown below are placeholders
+      {/* ── ETSY SHOP ────────────────────────────────────────────────── */}
+      <section id="shop" className="relative py-32 z-10 border-t border-white/5">
+        <div className="container mx-auto px-6 md:px-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-14">
+            <div>
+              <span className="text-xs font-display tracking-[0.3em] uppercase text-orange-400/70 block mb-3">Hand-Forged Goods</span>
+              <h2 className="font-display text-5xl md:text-6xl tracking-widest uppercase leading-none">
+                Forge <span className="text-forge-gradient">Shop</span>
+              </h2>
+            </div>
+            <div className="flex flex-col gap-3 text-right">
+              <p className="text-white/45 max-w-xs font-sans font-light text-sm leading-relaxed">
+                Small-batch iron goods. Candle holders, hooks, fire tools, and home accents.
               </p>
+              <a
+                href="https://www.etsy.com/shop/dandsironworks"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="nav-link text-sm font-display tracking-widest uppercase self-end"
+              >
+                View Full Etsy Shop →
+              </a>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {etsyProducts.map((product, i) => (
               <motion.div
                 key={product.id}
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.96 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
+                transition={{ delay: i * 0.06 }}
                 className="group cursor-pointer"
-                onClick={() => window.open(product.etsyUrl, '_blank')}
+                onClick={() => navigate(`/shop/${product.id}`)}
               >
-                <div className="aspect-square bg-zinc-900 border border-white/10 rounded-lg mb-4 overflow-hidden relative">
-                  <img 
-                    src={product.image} 
-                    alt={product.title} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 opacity-80 group-hover:opacity-100" 
+                <div
+                  className="aspect-square mb-4 overflow-hidden rounded-xl relative"
+                  style={{
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    transition: 'border-color 0.3s',
+                  }}
+                  onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,140,26,0.25)'}
+                  onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.08)'}
+                >
+                  <img
+                    src={product.image}
+                    alt={product.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-108 opacity-85 group-hover:opacity-100"
+                    style={{ transition: 'transform 0.5s ease, opacity 0.3s ease' }}
                   />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                    <GlassButton className="scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300">
-                      View on Etsy
-                    </GlassButton>
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                    <span className="font-display text-sm uppercase tracking-widest text-white border border-white/30 rounded-full px-5 py-2.5 bg-white/5">
+                      View Details
+                    </span>
                   </div>
                 </div>
                 <div>
-                  <h3 className="font-display tracking-widest uppercase text-white/90 group-hover:text-white transition-colors">{product.title}</h3>
-                  <p className="text-white/50 mt-1">{product.priceLabel}</p>
+                  <h3 className="font-display tracking-wider uppercase text-white/85 group-hover:text-white transition-colors text-sm">
+                    {product.title}
+                  </h3>
+                  <p className="text-orange-400/70 mt-1 font-sans text-sm">{product.priceLabel}</p>
                 </div>
               </motion.div>
             ))}
@@ -262,37 +359,82 @@ export function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer id="contact" className="bg-zinc-950 border-t border-white/10 py-16 relative overflow-hidden">
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-forge-gradient blur-[150px] opacity-10 rounded-full pointer-events-none" />
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col items-center justify-center text-center">
-            <img 
-              src="/brand/logo.png" 
-              alt="Ironworks" 
-              className="h-16 mb-8 invert opacity-50"
-            />
-            <div className="flex gap-8 mb-12">
-              <a href="tel:+15555555555" className="text-white/60 hover:text-white transition-colors font-display tracking-widest">
-                +1 (555) 555-5555
-              </a>
-              <a href="mailto:forge@example.com" className="text-white/60 hover:text-white transition-colors font-display tracking-widest">
-                forge@example.com
-              </a>
+      {/* ── FOOTER ───────────────────────────────────────────────────── */}
+      <footer id="contact" className="border-t border-white/8 py-16 relative overflow-hidden"
+        style={{ background: 'rgba(10,7,4,0.95)' }}>
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-orange-600/8 blur-[120px] rounded-full pointer-events-none" />
+
+        <div className="container mx-auto px-6 md:px-12 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+            <div className="flex flex-col items-start">
+              <img
+                src="/brand/logo.png"
+                alt="D&S Iron Works"
+                className="h-14 mb-4"
+                style={{ filter: 'invert(1) brightness(0.7)' }}
+              />
+              <p className="text-white/30 text-sm font-sans leading-relaxed max-w-xs">
+                D &amp; S Iron Works — hand-forged metal craft from Utah.
+              </p>
             </div>
-            <p className="text-white/30 text-sm">
-              &copy; {new Date().getFullYear()} Ironworks. Master Forged Goods.
+            <div>
+              <h4 className="font-display text-xs tracking-[0.3em] uppercase text-orange-400/60 mb-5">Contact</h4>
+              <div className="space-y-3">
+                <a href="tel:+14354219033" className="block text-white/50 hover:text-white transition-colors font-sans text-sm">
+                  (435) 421-9033
+                </a>
+                <a href="mailto:dandsiron@yahoo.com" className="block text-white/50 hover:text-white transition-colors font-sans text-sm">
+                  dandsiron@yahoo.com
+                </a>
+                <a
+                  href="https://www.facebook.com/DallanGoffBlacksmith"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-white/50 hover:text-white transition-colors font-sans text-sm"
+                >
+                  @DallanGoffBlacksmith
+                </a>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-display text-xs tracking-[0.3em] uppercase text-orange-400/60 mb-5">Navigate</h4>
+              <div className="space-y-3">
+                {['custom-designs', 'premium', 'shop'].map(id => (
+                  <button
+                    key={id}
+                    onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })}
+                    className="nav-link block text-sm font-display tracking-widest uppercase"
+                  >
+                    {id === 'custom-designs' ? 'Custom Designs' : id === 'premium' ? 'Signature Pieces' : 'Forge Shop'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4"
+            style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+          >
+            <p className="text-white/25 text-xs font-sans">
+              &copy; {new Date().getFullYear()} D &amp; S Iron Works. All rights reserved.
             </p>
+            <a
+              href="https://www.etsy.com/shop/dandsironworks"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-link text-xs font-display tracking-widest uppercase"
+            >
+              Shop on Etsy
+            </a>
           </div>
         </div>
       </footer>
 
-      {/* Checkout Modal */}
-      <CheckoutModal 
-        product={checkoutProduct} 
-        isOpen={!!checkoutProduct} 
-        onClose={() => setCheckoutProduct(null)} 
+      <CheckoutModal
+        product={checkoutProduct}
+        isOpen={!!checkoutProduct}
+        onClose={() => setCheckoutProduct(null)}
       />
     </div>
   );
