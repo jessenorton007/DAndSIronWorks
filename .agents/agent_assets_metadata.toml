@@ -1,0 +1,86 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "SVDeXTrvo_J_nzFILiNyR"
+uri = "file://artifacts/ironworks/public/images/hero-bg.png"
+type = "image"
+title = "Dark forge molten steel hero"
+
+[[generated]]
+id = "zt5wWC5xog0_fRZPh5sTT"
+uri = "file://artifacts/ironworks/public/images/portfolio-gate.png"
+type = "image"
+title = "Bespoke iron gate design"
+
+[[generated]]
+id = "Q5u0WzB4zHfSpnmNUsXEL"
+uri = "file://artifacts/ironworks/public/images/portfolio-fireplace.png"
+type = "image"
+title = "Custom forged iron fireplace"
+
+[[generated]]
+id = "GgbdYHoYazbyvUbwVL1vh"
+uri = "file://artifacts/ironworks/public/images/portfolio-railing.png"
+type = "image"
+title = "Forged iron sculptural railing"
+
+[[generated]]
+id = "ADtBkdCxuKop239OinpkN"
+uri = "file://artifacts/ironworks/public/images/portfolio-sculpture.png"
+type = "image"
+title = "Abstract iron sculpture"
+
+[[generated]]
+id = "f_LLU8_97TMRXsE87kYnn"
+uri = "file://artifacts/ironworks/public/images/product-candle.png"
+type = "image"
+title = "Forged iron candle holder"
+
+[[generated]]
+id = "bEYr9_BsByRDh9YKjqezG"
+uri = "file://artifacts/ironworks/public/images/product-hook.png"
+type = "image"
+title = "Forged iron coat hook"
+
+[[generated]]
+id = "oree05eP18Dya_kejr-qm"
+uri = "file://artifacts/ironworks/public/images/product-poker.png"
+type = "image"
+title = "Forged iron fire poker"
+
+[[generated]]
+id = "AqecQQE4D3L7IbcSUV-Ck"
+uri = "file://artifacts/ironworks/public/images/product-plant-stand.png"
+type = "image"
+title = "Iron plant stand"
+
+[[generated]]
+id = "yFLHhV22lIBY9Xak5wGJg"
+uri = "file://artifacts/ironworks/public/images/product-opener.png"
+type = "image"
+title = "Forged bottle opener"
+
+[[generated]]
+id = "E-SseTBL9uP05eD4DBRIL"
+uri = "file://artifacts/ironworks/public/images/product-bracket.png"
+type = "image"
+title = "Iron shelf bracket"
+
+[[generated]]
+id = "W4yx0Zs036UP_UcCGDUMx"
+uri = "file://artifacts/ironworks/public/images/premium-firepit.png"
+type = "image"
+title = "Large outdoor fire pit"
+
+[[generated]]
+id = "ox8B_RzTyFUBjYWrzFunG"
+uri = "file://artifacts/ironworks/public/images/premium-panel.png"
+type = "image"
+title = "Architectural metal panel"
+
+[[generated]]
+id = "vumG6pXdo8jMWGsNsZrTT"
+uri = "file://artifacts/ironworks/public/images/premium-fireplace.png"
+type = "image"
+title = "Modern steel fireplace"
