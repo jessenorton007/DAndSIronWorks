@@ -64,8 +64,8 @@ export function Home() {
               transition={{ duration: 0.9, delay: 0.25 }}
               className="font-display text-6xl md:text-7xl lg:text-8xl tracking-widest uppercase text-white leading-none mb-6"
             >
-              Forged<br />
-              in <span className="text-forge-gradient" style={{ textShadow: '0 0 40px rgba(255,77,0,0.35)' }}>Fire</span>
+              Iron<br />
+              <span className="text-forge-gradient" style={{ textShadow: '0 0 48px rgba(255,77,0,0.45)', filter: 'drop-shadow(0 0 20px rgba(255,100,0,0.4))' }}>By Hand</span>
             </motion.h1>
 
             <motion.p
@@ -84,9 +84,19 @@ export function Home() {
               transition={{ duration: 0.7, delay: 0.65 }}
               className="flex flex-wrap gap-4"
             >
-              <GlassButton onClick={() => scrollTo('custom-designs')}>
-                View Custom Work
-              </GlassButton>
+              <motion.button
+                onClick={() => scrollTo('custom-designs')}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="relative inline-flex items-center justify-center px-8 py-4 rounded-full font-display font-medium text-base uppercase tracking-wider text-white overflow-hidden"
+                style={{
+                  background: 'linear-gradient(135deg, #FF4D00 0%, #FF8C1A 55%, #FFB347 100%)',
+                  boxShadow: '0 4px 28px rgba(255,77,0,0.45), inset 0 1px 0 rgba(255,255,255,0.2)',
+                }}
+              >
+                <span className="relative z-10">View Custom Work</span>
+                <div className="absolute inset-0 bg-white/0 hover:bg-white/10 transition-colors rounded-full" />
+              </motion.button>
               <GlassButton onClick={() => scrollTo('shop')} className="bg-white/3">
                 Shop Now
               </GlassButton>

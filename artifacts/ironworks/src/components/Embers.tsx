@@ -45,7 +45,7 @@ export function Embers() {
       };
     };
 
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 90; i++) {
       particles.push({
         ...createParticle(),
         y: Math.random() * canvas.height
@@ -92,7 +92,7 @@ export function Embers() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0 mix-blend-screen"
-      style={{ opacity: 0.6 }}
+      style={{ opacity: 0.85 }}
     />
   );
 }
