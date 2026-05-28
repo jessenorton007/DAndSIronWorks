@@ -133,9 +133,9 @@ export function Home() {
               className="relative w-48 h-48 rounded-2xl overflow-hidden self-start ml-12"
               style={{ border: '1px solid rgba(255,140,26,0.15)', boxShadow: '0 16px 60px rgba(0,0,0,0.4)' }}
             >
-              <img src="/images/portfolio-fireplace.png" alt="Custom Fireplace" className="w-full h-full object-cover" />
+              <img src="/images/candelabra.jpg" alt="Forged Art" className="w-full h-full object-cover object-top" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/65 to-transparent" />
-              <div className="absolute bottom-3 left-3 text-xs font-display tracking-widest uppercase text-white/80">Fireplaces</div>
+              <div className="absolute bottom-3 left-3 text-xs font-display tracking-widest uppercase text-white/80">Forged Art</div>
             </div>
             <div
               className="relative w-56 h-40 rounded-2xl overflow-hidden"
@@ -193,9 +193,9 @@ export function Home() {
                 desc: 'Personalized metal signs, address plaques, and custom cut artwork for home and ranch',
               },
               {
-                src: '/images/portfolio-fireplace.png',
-                label: 'Fireplaces',
-                desc: 'Indoor and outdoor custom fireplace surrounds, inserts, and decorative screens',
+                src: '/images/candelabra.jpg',
+                label: 'Forged Art & Décor',
+                desc: 'Candelabras, hooks, bells, leaf art, treble clefs — one-of-a-kind decorative ironwork',
               },
               {
                 src: '/images/portfolio-railing.png',
