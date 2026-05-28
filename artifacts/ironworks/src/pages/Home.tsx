@@ -125,7 +125,7 @@ export function Home() {
               className="relative w-64 h-64 rounded-2xl overflow-hidden"
               style={{ border: '1px solid rgba(255,140,26,0.2)', boxShadow: '0 24px 80px rgba(0,0,0,0.5)' }}
             >
-              <img src="/images/custom-sign.jpg" alt="Custom Metal Signs" className="w-full h-full object-cover object-center" />
+              <img src="/images/custom-sign-bealer.jpg" alt="Custom Metal Signs" className="w-full h-full object-cover object-center" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
               <div className="absolute bottom-3 left-3 text-xs font-display tracking-widest uppercase text-white/80">Custom Signs & Art</div>
             </div>
@@ -133,7 +133,7 @@ export function Home() {
               className="relative w-48 h-48 rounded-2xl overflow-hidden self-start ml-12"
               style={{ border: '1px solid rgba(255,140,26,0.15)', boxShadow: '0 16px 60px rgba(0,0,0,0.4)' }}
             >
-              <img src="/images/candelabra.jpg" alt="Forged Art" className="w-full h-full object-cover object-top" />
+              <img src="/images/tree-of-life.jpg" alt="Tree of Life Iron Sculpture" className="w-full h-full object-cover object-center" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/65 to-transparent" />
               <div className="absolute bottom-3 left-3 text-xs font-display tracking-widest uppercase text-white/80">Forged Art</div>
             </div>
@@ -141,7 +141,7 @@ export function Home() {
               className="relative w-56 h-40 rounded-2xl overflow-hidden"
               style={{ border: '1px solid rgba(255,140,26,0.12)', boxShadow: '0 12px 48px rgba(0,0,0,0.4)' }}
             >
-              <img src="/images/fire-pit.jpg" alt="Custom Fire Pit" className="w-full h-full object-cover object-center" />
+              <img src="/images/fire-pit-real.jpg" alt="Custom Fire Pit" className="w-full h-full object-cover object-center" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/65 to-transparent" />
               <div className="absolute bottom-3 left-3 text-xs font-display tracking-widest uppercase text-white/80">Fire Pits</div>
             </div>
@@ -188,14 +188,14 @@ export function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 mb-16">
             {[
               {
-                src: '/images/custom-sign.jpg',
+                src: '/images/custom-sign-bealer.jpg',
                 label: 'Custom Signs & Art',
                 desc: 'Personalized metal signs, address plaques, and custom cut artwork for home and ranch',
               },
               {
-                src: '/images/candelabra.jpg',
+                src: '/images/tree-of-life.jpg',
                 label: 'Forged Art & Décor',
-                desc: 'Candelabras, hooks, bells, leaf art, treble clefs — one-of-a-kind decorative ironwork',
+                desc: 'Tree of life sculptures, candelabras, hooks, bells, and one-of-a-kind decorative ironwork',
               },
               {
                 src: '/images/portfolio-railing.png',
@@ -203,9 +203,9 @@ export function Home() {
                 desc: 'Stair railings, balcony guards, and interior handrails — all hand-forged',
               },
               {
-                src: '/images/fire-pit.jpg',
+                src: '/images/fire-pit-real.jpg',
                 label: 'Fire Pits',
-                desc: 'Outdoor fire pits and bowls with custom cutout designs — CNC or hand-forged',
+                desc: 'Outdoor fire pits with custom cutout designs — CNC plasma or hand-forged',
               },
             ].map((item, i) => (
               <motion.div
@@ -233,7 +233,7 @@ export function Home() {
             ))}
           </div>
 
-          {/* Candelabra feature — a taste of signature craft */}
+          {/* Featured piece — custom iron table */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -241,20 +241,20 @@ export function Home() {
             className="flex flex-col sm:flex-row gap-6 mb-16 rounded-2xl overflow-hidden"
             style={{ border: '1px solid rgba(255,140,26,0.14)', background: 'rgba(255,255,255,0.02)' }}
           >
-            <div className="sm:w-64 h-56 sm:h-auto flex-shrink-0 overflow-hidden">
+            <div className="sm:w-72 h-64 sm:h-auto flex-shrink-0 overflow-hidden">
               <img
-                src="/images/candelabra.jpg"
-                alt="Hand-forged iron candelabra"
+                src="/images/iron-table.jpg"
+                alt="Custom hand-forged iron table"
                 className="w-full h-full object-cover object-top"
               />
             </div>
             <div className="flex flex-col justify-center p-6 sm:p-8">
               <span className="text-xs font-display tracking-[0.3em] uppercase text-orange-400/70 mb-2">Signature Craft</span>
               <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-widest text-white mb-3">
-                Iron Candelabras &<br />Table Art
+                Custom Iron<br />Furniture & Tables
               </h3>
               <p className="text-white/55 font-sans font-light leading-relaxed mb-5 max-w-md">
-                Hand-forged iron candelabra trees with hardwood burl bases. One-of-a-kind sculptures that double as functional art for any space.
+                Hand-forged twisted-leg iron tables with CNC cut tops — built in the shop from raw steel. Every weld, every twist, done by hand.
               </p>
               <GlassButton onClick={() => navigate('/contact')} className="self-start text-sm px-6 py-2.5">
                 Commission a Piece
