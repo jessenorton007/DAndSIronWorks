@@ -54,7 +54,7 @@ export const defaultEtsyProducts: EtsyProduct[] = [
     title: 'Hand-Forged Eagle Pendant Necklace',
     image: '/products/eagle-pendant.jpg',
     priceLabel: '$51.00',
-    etsyUrl: 'https://www.etsy.com/shop/dandsironworks',
+    etsyUrl: 'https://www.etsy.com/listing/4434853010/hand-forged-eagle-pendant-necklace',
     description: 'A bold geometric eagle struck from iron — embodying strength, honor, and courage. Choose your cord color.',
     badge: 'In 9 carts',
     details: ['Ships from Utah', 'Returns & exchanges accepted', 'Cord color options available', 'Handmade by D&S Iron Works'],
