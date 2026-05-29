@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, X, Eye, EyeOff } from 'lucide-react';
 import { useLocation } from 'wouter';
 
-const ADMIN_PASSWORD = 'd&sironworks123';
+const ADMIN_PASSWORD = 'dandsironworks123';
 const SESSION_KEY = 'ds_admin_auth';
 
 export function isAdminAuthenticated(): boolean {
@@ -82,7 +82,7 @@ export function AdminGear() {
                   </div>
                   <div>
                     <h2 className="font-display text-lg uppercase tracking-widest text-white">Admin Access</h2>
-                    <p className="text-xs text-white/30 font-sans">D &amp; S Iron Works</p>
+                    <p className="text-xs text-white/30 font-sans">Admin Panel</p>
                   </div>
                 </div>
 
