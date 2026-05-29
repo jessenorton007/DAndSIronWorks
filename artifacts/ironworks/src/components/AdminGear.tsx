@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, X, Eye, EyeOff } from 'lucide-react';
 import { useLocation } from 'wouter';
 
-const ADMIN_PASSWORD = 'd&sironworks543';
+const ADMIN_PASSWORD = 'dandsiron123';
 const SESSION_KEY = 'ds_admin_auth';
 
 export function isAdminAuthenticated(): boolean {
