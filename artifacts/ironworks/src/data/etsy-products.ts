@@ -9,6 +9,9 @@ export interface EtsyProduct {
   details?: string[];
 }
 
+// Etsy listing URLs — replace each etsyUrl with the exact listing URL from your
+// Etsy shop manager (etsy.com/your/shops/dandsironworks/tools/listings).
+// Until then, each URL searches within the D&S Iron Works shop for that item.
 export const defaultEtsyProducts: EtsyProduct[] = [
   {
     id: 'spiral-pendant-tree',
@@ -25,7 +28,7 @@ export const defaultEtsyProducts: EtsyProduct[] = [
     title: 'Copper Horseshoe Nail Heart Earrings, Western Jewelry',
     image: '/products/copper-nail-earrings.jpg',
     priceLabel: '$20.00',
-    etsyUrl: 'https://www.etsy.com/listing/667435312/copper-horseshoe-nail-earrings',
+    etsyUrl: 'https://www.etsy.com/shop/dandsironworks/search?q=copper+horseshoe+nail+heart+earrings',
     description: 'Repurposed horseshoe nails reshaped into copper drop earrings. Western heritage meets wearable craft.',
     badge: 'Only 10 left',
     details: ['Ships from Utah', 'Returns & exchanges accepted', 'Handmade by D&S Iron Works'],
@@ -45,7 +48,7 @@ export const defaultEtsyProducts: EtsyProduct[] = [
     title: 'Handmade Copper Horseshoe Nail Heart Earrings, Western Jewelry',
     image: '/products/copper-heart-earrings.jpg',
     priceLabel: '$25.00',
-    etsyUrl: 'https://www.etsy.com/listing/655540098/horseshoe-nail-earrings',
+    etsyUrl: 'https://www.etsy.com/shop/dandsironworks/search?q=copper+horseshoe+nail+heart+earrings',
     description: 'Hand-bent copper horseshoe nails formed into open hearts. Simple, warm, and entirely handmade.',
     details: ['Ships from Utah', 'Returns & exchanges accepted', 'Handmade by D&S Iron Works'],
   },
@@ -74,7 +77,7 @@ export const defaultEtsyProducts: EtsyProduct[] = [
     title: 'Horseshoe Nail Celtic Cross Pendant, Copper Wire Wrapped',
     image: '/products/cross-copper-wire.jpg',
     priceLabel: '$47.00',
-    etsyUrl: 'https://www.etsy.com/listing/636937321/horseshoe-nail-celtic-cross-pendant',
+    etsyUrl: 'https://www.etsy.com/shop/dandsironworks/search?q=horseshoe+nail+celtic+cross+copper+wire',
     description: 'A horseshoe nail Celtic cross wound with copper wire — faith and craft merged into one piece.',
     details: ['Ships from Utah', 'Returns & exchanges accepted', 'Materials: Copper, Steel', 'Pendant: 1" W × 2.5" H', 'Necklace length: 28"', 'Handmade by D&S Iron Works'],
   },
@@ -93,7 +96,7 @@ export const defaultEtsyProducts: EtsyProduct[] = [
     title: 'Hand-Forged Iron Spiral Pendant — Strength & Resilience',
     image: '/products/spiral-pendant-drift.jpg',
     priceLabel: '$31.00',
-    etsyUrl: 'https://www.etsy.com/listing/627508461/iron-spiral-pendant-blacksmith-pendent',
+    etsyUrl: 'https://www.etsy.com/shop/dandsironworks/search?q=iron+spiral+pendant+strength+resilience',
     description: "A symbol of life's journey hand-hammered in iron. Heavy, grounded, and built to last.",
     badge: 'In 19 carts',
     details: ['Ships from Utah', 'Returns & exchanges accepted', 'Handmade by D&S Iron Works'],
@@ -103,7 +106,7 @@ export const defaultEtsyProducts: EtsyProduct[] = [
     title: 'Large Celtic Cross Pendant, Handmade with Religious Significance',
     image: '/products/large-celtic-cross.jpg',
     priceLabel: '$58.00',
-    etsyUrl: 'https://www.etsy.com/listing/4301151298/horseshoe-nail-celtic-cross-pendant',
+    etsyUrl: 'https://www.etsy.com/shop/dandsironworks/search?q=large+celtic+cross+pendant',
     description: 'A large, statement Celtic cross wound with wire — powerful presence, deep meaning.',
     details: ['Ships from Utah', 'Returns & exchanges accepted', 'Materials: Copper, Steel', 'Necklace color options available', 'Handmade by D&S Iron Works'],
   },
@@ -112,7 +115,7 @@ export const defaultEtsyProducts: EtsyProduct[] = [
     title: 'Handmade Horseshoe Nail Celtic Cross Pendant, Rustic Copper Wire',
     image: '/products/rustic-copper-cross.jpg',
     priceLabel: '$58.00',
-    etsyUrl: 'https://www.etsy.com/listing/640942015/horseshoe-nail-cross',
+    etsyUrl: 'https://www.etsy.com/shop/dandsironworks/search?q=horseshoe+nail+celtic+cross+rustic+copper',
     description: 'Hand-hammered nail cross wrapped in rustic copper wire. Recycled steel with sustainable character.',
     badge: 'In 5 carts',
     details: ['Ships from Utah', 'Returns & exchanges accepted', 'Materials: Copper, Steel', 'Recycled & upcycled metal', 'Handmade by D&S Iron Works'],
