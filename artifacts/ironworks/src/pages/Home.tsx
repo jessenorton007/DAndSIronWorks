@@ -6,8 +6,104 @@ import { Embers } from "@/components/Embers";
 import { GlassButton } from "@/components/GlassButton";
 import { CheckoutModal } from "@/components/CheckoutModal";
 import { FloatingContactBanner } from "@/components/FloatingContactBanner";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useEtsyProducts, usePremiumProducts } from "@/hooks/useAdminProducts";
 import { PremiumProduct } from "@/data/premium-products";
+import { services } from "@/data/services";
+import { useSeo } from "@/lib/seo";
+
+const processVideos = [
+  {
+    title: 'Maple Leaf Detail',
+    description: 'A close shop view of the cut leaf form after heat work begins to bring out the final detail.',
+    src: '/images/maple-leaf-detail.mp4',
+    poster: '/images/maple-leaf-detail-poster.jpg',
+    aspect: 'wide',
+  },
+  {
+    title: 'Hammered to Shape',
+    description: 'The red-hot maple leaf being refined by hand on the anvil while the steel is still moving.',
+    src: '/images/hammering-maple-leaf.mp4',
+    poster: '/images/hammering-maple-leaf-poster.jpg',
+    aspect: 'wide',
+  },
+  {
+    title: 'Red-Hot Maple Leaf',
+    description: 'A custom maple leaf form glowing on the anvil before the final shaping and finish work.',
+    src: '/images/red-hot-maple-leaf-forging.mp4',
+    poster: '/images/red-hot-maple-leaf-poster.jpg',
+    aspect: 'portrait',
+  },
+  {
+    title: 'Plasma-Cut Detail',
+    description: 'Shop-floor cutting work that turns raw plate into clean custom ironwork components.',
+    src: '/images/plasma-cutting-process.mp4',
+    poster: '/images/plasma-cutting-poster.jpg',
+    aspect: 'portrait',
+  },
+  {
+    title: 'Plasma Sparks',
+    description: 'A short cut sequence showing the torch working through steel plate for custom metal art.',
+    src: '/images/plasma-sparks-cutting.mp4',
+    poster: '/images/plasma-sparks-poster.jpg',
+    aspect: 'wide',
+  },
+] as const;
+
+type ProcessVideo = (typeof processVideos)[number];
+
+const featuredProcessVideo = processVideos[0];
+const portraitProcessVideos = processVideos.filter((video) => video.aspect === 'portrait');
+const secondaryLandscapeVideos = processVideos.filter((video) => video.aspect === 'wide' && video.title !== featuredProcessVideo.title);
+
+function ProcessVideoCard({
+  video,
+  delay = 0,
+  compact = false,
+  featured = false,
+}: {
+  video: ProcessVideo;
+  delay?: number;
+  compact?: boolean;
+  featured?: boolean;
+}) {
+  const videoFrameClass = video.aspect === 'portrait'
+    ? compact ? 'aspect-[9/16] max-h-[28rem]' : 'aspect-[9/16] max-h-[32rem]'
+    : 'aspect-video';
+
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-80px' }}
+      transition={{ delay }}
+      className={`snap-center rounded-xl overflow-hidden bg-white/[0.025] ${featured ? 'shadow-[0_22px_70px_rgba(0,0,0,0.38)]' : ''}`}
+      style={{ border: '1px solid rgba(255,255,255,0.09)' }}
+    >
+      <div className="relative bg-black">
+        <video
+          controls
+          muted
+          playsInline
+          preload="none"
+          poster={video.poster}
+          aria-label={`${video.title} forge process video`}
+          className={`w-full object-cover ${videoFrameClass}`}
+        >
+          <source src={video.src} type="video/mp4" />
+        </video>
+      </div>
+      <div className={compact ? 'p-4' : 'p-4 sm:p-5'}>
+        <h3 className="font-display text-base sm:text-lg uppercase tracking-wider text-white mb-1">
+          {video.title}
+        </h3>
+        <p className={`text-white/50 text-sm font-sans leading-relaxed ${compact ? 'line-clamp-2' : ''}`}>
+          {video.description}
+        </p>
+      </div>
+    </motion.article>
+  );
+}
 
 export function Home() {
   const { scrollYProgress } = useScroll();
@@ -18,6 +114,23 @@ export function Home() {
 
   const { products: etsyProducts } = useEtsyProducts();
   const { products: premiumProducts } = usePremiumProducts();
+
+  useSeo({
+    title: 'D&S Iron Works | Custom Ironwork & Hand-Forged Metal Craft in Utah',
+    description: 'D&S Iron Works by Dallan Goff creates custom fireplaces, fire pits, metal signs, forged railings, sculptural ironwork, and hand-forged goods in Utah.',
+    path: '/',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'LocalBusiness',
+      name: 'D&S Iron Works',
+      description: 'Custom ironwork, forged metal art, fire pits, railings, signs, sculptures, and hand-forged goods by Dallan Goff.',
+      image: typeof window === 'undefined' ? '/opengraph.jpg' : `${window.location.origin}/opengraph.jpg`,
+      telephone: '+1-435-421-9033',
+      email: 'dandsiron@yahoo.com',
+      areaServed: 'Utah',
+      sameAs: ['https://www.facebook.com/DallanGoffBlacksmith', 'https://www.etsy.com/shop/dandsironworks'],
+    },
+  });
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -36,18 +149,24 @@ export function Home() {
           style={{ opacity: heroOpacity, scale: heroScale }}
         >
           {/* Subtle overlays — reduced from before so the forge shines through */}
-          <div className="absolute inset-0 bg-[#0d0a07]/40 z-10" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/30 to-transparent z-10" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70 z-10" />
+          <div className="absolute inset-0 bg-[#0d0a07]/55 md:bg-[#0d0a07]/40 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/20 md:from-black/75 md:via-black/30 md:to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/15 to-black/85 md:from-black/40 md:via-transparent md:to-black/70 z-10" />
 
           {/* Forging video background — loops silently */}
+          <img
+            src="/images/mobile-hero-iron-table.jpg"
+            alt=""
+            className="md:hidden w-full h-full object-cover object-center"
+            aria-hidden="true"
+          />
           <video
             autoPlay
             muted
             loop
             playsInline
             poster="/images/hero-bg.png"
-            className="w-full h-full object-cover object-center"
+            className="hidden md:block w-full h-full object-cover object-center"
             aria-hidden="true"
           >
             <source src="/images/forging-hero.mp4" type="video/mp4" />
@@ -75,8 +194,8 @@ export function Home() {
               transition={{ duration: 0.9, delay: 0.25 }}
               className="font-display text-6xl md:text-7xl lg:text-8xl tracking-widest uppercase text-white leading-none mb-6"
             >
-              Iron<br />
-              <span className="text-forge-gradient" style={{ textShadow: '0 0 48px rgba(255,77,0,0.55)', filter: 'drop-shadow(0 0 24px rgba(255,100,0,0.5))' }}>By Hand</span>
+              Custom<br />
+              <span className="text-forge-gradient" style={{ textShadow: '0 0 48px rgba(255,77,0,0.55)', filter: 'drop-shadow(0 0 24px rgba(255,100,0,0.5))' }}>Ironwork</span>
             </motion.h1>
 
             <motion.p
@@ -176,7 +295,7 @@ export function Home() {
                 The Heart of the Shop
               </span>
               <h2 className="font-display text-4xl sm:text-5xl md:text-6xl tracking-widest uppercase leading-none">
-                <span className="text-forge-gradient">Bespoke</span><br />Craft
+                <span className="text-forge-gradient">Custom</span><br />Ironwork
               </h2>
             </div>
             <p className="text-white/55 max-w-sm font-sans font-light leading-relaxed">
@@ -190,21 +309,25 @@ export function Home() {
               {
                 src: '/images/custom-sign-bealer.jpg',
                 label: 'Custom Signs & Art',
+                alt: 'Custom metal sign by D&S Iron Works',
                 desc: 'Personalized metal signs, address plaques, and custom cut artwork for home and ranch',
               },
               {
                 src: '/images/tree-of-life.jpg',
                 label: 'Forged Art & Décor',
+                alt: 'Tree of Life forged iron sculpture',
                 desc: 'Tree of life sculptures, candelabras, hooks, bells, and one-of-a-kind decorative ironwork',
               },
               {
                 src: '/images/portfolio-railing.png',
                 label: 'Forged Railings',
+                alt: 'Hand-forged stair railing example',
                 desc: 'Stair railings, balcony guards, and interior handrails — all hand-forged',
               },
               {
                 src: '/images/fire-pit-real.jpg',
                 label: 'Fire Pits',
+                alt: 'Custom fire pit with metal cutout design',
                 desc: 'Outdoor fire pits with custom cutout designs — CNC plasma or hand-forged',
               },
             ].map((item, i) => (
@@ -219,7 +342,7 @@ export function Home() {
               >
                 <img
                   src={item.src}
-                  alt={item.label}
+                  alt={item.alt}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
@@ -231,6 +354,39 @@ export function Home() {
                   style={{ boxShadow: 'inset 0 0 0 1px rgba(255,140,26,0.25)' }} />
               </motion.div>
             ))}
+          </div>
+
+          <div className="mb-16">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-7">
+              <div>
+                <span className="text-xs font-display tracking-[0.3em] uppercase text-orange-400/70 block mb-3">
+                  Services
+                </span>
+                <h3 className="font-display text-3xl sm:text-4xl tracking-widest uppercase text-white">
+                  Custom Metalwork Categories
+                </h3>
+              </div>
+              <GlassButton onClick={() => navigate('/services')} className="self-start md:self-auto text-sm px-6 py-2.5">
+                View All Services
+              </GlassButton>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {services.map((service) => (
+                <button
+                  key={service.slug}
+                  onClick={() => navigate(`/services/${service.slug}`)}
+                  className="group rounded-xl p-4 sm:p-5 text-left bg-white/[0.025] hover:bg-white/[0.04] transition-colors"
+                  style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+                >
+                  <span className="text-[10px] font-display tracking-[0.24em] uppercase text-orange-400/55 block mb-2">
+                    {service.eyebrow}
+                  </span>
+                  <h4 className="font-display text-base sm:text-lg uppercase tracking-wider text-white group-hover:text-orange-100 transition-colors">
+                    {service.shortTitle}
+                  </h4>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Featured piece — custom iron table */}
@@ -299,13 +455,80 @@ export function Home() {
         </div>
       </section>
 
+      {/* ── SHOP PROCESS ─────────────────────────────────────────────── */}
+      <section id="process" className="relative py-20 sm:py-24 z-10 border-t border-white/5">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,77,0,0.05),transparent_55%)] pointer-events-none" />
+        <div className="container mx-auto px-5 sm:px-6 md:px-12 relative z-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10 sm:mb-12">
+            <div>
+              <span className="text-xs font-display tracking-[0.3em] uppercase text-orange-400/70 block mb-3">
+                Forged in Motion
+              </span>
+              <h2 className="font-display text-4xl sm:text-5xl md:text-6xl tracking-widest uppercase leading-none mb-5">
+                From <span className="text-forge-gradient">Detail</span><br />to Form
+              </h2>
+            </div>
+            <p className="text-white/55 max-w-md font-sans font-light leading-relaxed">
+              A focused look at the shop process: cut steel, hand shaping, and the details behind custom metal art.
+            </p>
+          </div>
+
+          <div className="hidden lg:grid grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-5 items-start">
+            <div className="grid grid-cols-2 gap-5 pt-14">
+              {portraitProcessVideos.map((video, i) => (
+                <ProcessVideoCard
+                  key={video.title}
+                  video={video}
+                  delay={i * 0.06}
+                  compact
+                />
+              ))}
+            </div>
+            <div className="grid gap-5">
+              <ProcessVideoCard video={featuredProcessVideo} featured />
+              <div className="grid grid-cols-2 gap-5">
+                {secondaryLandscapeVideos.map((video, i) => (
+                  <ProcessVideoCard
+                    key={video.title}
+                    video={video}
+                    delay={0.12 + i * 0.06}
+                    compact
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="relative lg:hidden">
+            <Carousel opts={{ align: 'center', loop: true }} className="w-full" aria-label="Forge process videos">
+              <CarouselContent className="ml-0 items-start">
+                {processVideos.map((video, i) => (
+                  <CarouselItem key={video.title} className="basis-full pl-0">
+                    <div className="px-1">
+                      <ProcessVideoCard video={video} delay={i * 0.04} />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="inline-flex left-2 top-[34%] h-10 w-10 border-white/15 bg-black/70 text-white hover:bg-black/85 hover:text-white disabled:opacity-35" />
+              <CarouselNext className="inline-flex right-2 top-[34%] h-10 w-10 border-white/15 bg-black/70 text-white hover:bg-black/85 hover:text-white disabled:opacity-35" />
+            </Carousel>
+            <div className="mt-4 flex justify-center gap-1.5" aria-hidden="true">
+              {processVideos.map((video) => (
+                <span key={video.title} className="h-1.5 w-6 rounded-full bg-white/15" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── PREMIUM SIGNATURE PIECES ─────────────────────────────────── */}
       <section id="premium" className="relative py-24 sm:py-32 z-10 border-t border-white/5">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,77,0,0.04)_0%,transparent_65%)] pointer-events-none" />
         <div className="container mx-auto px-5 sm:px-6 md:px-12 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
             <div>
-              <span className="text-xs font-display tracking-[0.3em] uppercase text-orange-400/70 block mb-3">Ready to Order</span>
+              <span className="text-xs font-display tracking-[0.3em] uppercase text-orange-400/70 block mb-3">Available by Inquiry</span>
               <h2 className="font-display text-4xl sm:text-5xl md:text-6xl tracking-widest uppercase leading-none">
                 Signature <span className="text-forge-gradient">Pieces</span>
               </h2>
@@ -344,7 +567,7 @@ export function Home() {
                     <p className="text-white/55 text-sm mb-6 flex-1 font-sans leading-relaxed">{product.description}</p>
                     <div className="flex items-center justify-between mt-auto">
                       <span className="font-display text-xl sm:text-2xl tracking-wider text-forge-gradient">{product.priceLabel}</span>
-                      <GlassButton onClick={() => setCheckoutProduct(product)} className="px-4 sm:px-5 py-2 sm:py-2.5 text-sm">Order</GlassButton>
+                      <GlassButton onClick={() => setCheckoutProduct(product)} className="px-4 sm:px-5 py-2 sm:py-2.5 text-sm">Inquire</GlassButton>
                     </div>
                   </div>
                 </motion.div>
@@ -442,7 +665,8 @@ export function Home() {
             <div className="flex flex-col items-start">
               <img src="/brand/logo.png" alt="D&S Iron Works" className="h-12 sm:h-14 mb-4" style={{ filter: 'invert(1) brightness(0.7)' }} />
               <p className="text-white/35 text-sm font-sans leading-relaxed max-w-xs">
-                D &amp; S Iron Works — hand-forged metal craft from Utah.
+                D &amp; S Iron Works by Dallan Goff creates custom ironwork, forged railings,
+                fire pits, signs, sculptures, and hand-forged goods in Utah.
               </p>
             </div>
             <div>
@@ -464,6 +688,7 @@ export function Home() {
                   <button key={id} onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })}
                     className="nav-link block text-sm font-display tracking-widest uppercase">{label}</button>
                 ))}
+                <button onClick={() => navigate('/services')} className="nav-link block text-sm font-display tracking-widest uppercase">Services</button>
                 <button onClick={() => navigate('/contact')} className="nav-link block text-sm font-display tracking-widest uppercase">Contact</button>
               </div>
             </div>
@@ -487,6 +712,7 @@ export function Home() {
       {checkoutProduct && (
         <CheckoutModal
           product={checkoutProduct}
+          isOpen={!!checkoutProduct}
           onClose={() => setCheckoutProduct(null)}
         />
       )}

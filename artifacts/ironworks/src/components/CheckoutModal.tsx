@@ -40,8 +40,8 @@ export function CheckoutModal({ product, isOpen, onClose }: CheckoutModalProps) 
       setForm({ name: '', email: '', phone: '', address: '' });
       onClose();
       toast({
-        title: "Order Received",
-        description: "We'll be in touch via QuickBooks invoice within 24 hours.",
+        title: "Inquiry Received",
+        description: "We'll be in touch directly to confirm details and next steps.",
       });
     }, 1200);
   };
@@ -78,7 +78,7 @@ export function CheckoutModal({ product, isOpen, onClose }: CheckoutModalProps) 
                   style={{ background: 'rgba(255,77,0,0.04)', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,77,0,0.08),transparent_60%)] pointer-events-none" />
                   <div className="relative z-10 flex-1 flex flex-col">
-                    <h3 className="font-display uppercase tracking-widest text-xs text-orange-400/70 mb-4">Order Summary</h3>
+                    <h3 className="font-display uppercase tracking-widest text-xs text-orange-400/70 mb-4">Inquiry Summary</h3>
                     <div className="aspect-square rounded-xl overflow-hidden mb-5" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
                       {product.image
                         ? <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
@@ -88,7 +88,7 @@ export function CheckoutModal({ product, isOpen, onClose }: CheckoutModalProps) 
                     <h2 className="font-display text-xl text-white uppercase tracking-wider mb-2">{product.title}</h2>
                     <p className="text-white/45 text-sm font-sans mb-6 flex-1">{product.description}</p>
                     <div className="pt-5 flex justify-between items-end" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                      <span className="text-white/35 text-sm font-sans">Total</span>
+                      <span className="text-white/35 text-sm font-sans">Listed price</span>
                       <span className="font-display text-2xl text-forge-gradient">{product.priceLabel}</span>
                     </div>
                   </div>
@@ -119,10 +119,10 @@ export function CheckoutModal({ product, isOpen, onClose }: CheckoutModalProps) 
                     </div>
                     <div className="mt-3">
                       <GlassButton type="submit" disabled={isSubmitting} className="w-full justify-center">
-                        {isSubmitting ? 'Processing...' : 'Submit Order'}
+                        {isSubmitting ? 'Sending...' : 'Send Inquiry'}
                       </GlassButton>
                     </div>
-                    <p className="text-center text-xs text-white/25 font-sans">QuickBooks invoice sent within 24 hours</p>
+                    <p className="text-center text-xs text-white/25 font-sans">This sends a direct inquiry, not an Etsy order.</p>
                   </form>
                 </div>
               </div>

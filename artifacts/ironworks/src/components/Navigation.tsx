@@ -31,8 +31,14 @@ export function Navigation() {
     navigate('/contact');
   };
 
+  const goServices = () => {
+    setMobileMenuOpen(false);
+    navigate('/services');
+  };
+
   const navLinks = [
     { name: 'Custom Designs', action: () => scrollTo('custom-designs') },
+    { name: 'Services', action: goServices },
     { name: 'Shop', action: () => scrollTo('shop') },
     { name: 'Premium', action: () => scrollTo('premium') },
     { name: 'Contact', action: goContact },

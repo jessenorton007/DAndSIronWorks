@@ -5,12 +5,39 @@ import { useEtsyProducts } from '@/hooks/useAdminProducts';
 import { GlassButton } from '@/components/GlassButton';
 import { Navigation } from '@/components/Navigation';
 import { FloatingContactBanner } from '@/components/FloatingContactBanner';
+import { useSeo } from '@/lib/seo';
 
 export function ProductPage() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { products } = useEtsyProducts();
   const product = products.find(p => p.id === params.id);
+
+  useSeo({
+    title: product ? `${product.title} | D&S Iron Works` : 'Hand-Forged Products | D&S Iron Works',
+    description: product?.description ?? 'Hand-forged iron goods, jewelry, hooks, bells, and custom metalwork from D&S Iron Works in Utah.',
+    path: product ? `/shop/${product.id}` : '/shop',
+    image: product?.image,
+    type: 'product',
+    jsonLd: product
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name: product.title,
+          image: typeof window === 'undefined' ? product.image : `${window.location.origin}${product.image}`,
+          description: product.description,
+          brand: {
+            '@type': 'Brand',
+            name: 'D&S Iron Works',
+          },
+          offers: {
+            '@type': 'Offer',
+            url: product.etsyUrl,
+            availability: 'https://schema.org/InStock',
+          },
+        }
+      : undefined,
+  });
 
   if (!product) {
     return (

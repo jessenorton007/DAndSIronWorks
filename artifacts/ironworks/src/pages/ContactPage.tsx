@@ -7,6 +7,7 @@ import { FloatingContactBanner } from '@/components/FloatingContactBanner';
 import { GlassButton } from '@/components/GlassButton';
 import { Embers } from '@/components/Embers';
 import { saveInquiry } from '@/hooks/useAdminProducts';
+import { useSeo } from '@/lib/seo';
 
 const PROJECT_TYPES = [
   'Custom Gate / Fence',
@@ -19,6 +20,18 @@ const PROJECT_TYPES = [
 
 export function ContactPage() {
   const [, navigate] = useLocation();
+  useSeo({
+    title: 'Contact D&S Iron Works | Custom Ironwork Commissions in Utah',
+    description: 'Contact Dallan Goff at D&S Iron Works to start a custom ironwork, fire pit, metal sign, railing, forged art, or blacksmith commission in Utah.',
+    path: '/contact',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'ContactPage',
+      name: 'Contact D&S Iron Works',
+      description: 'Start a custom ironwork project with D&S Iron Works.',
+    },
+  });
+
   const [form, setForm] = useState({
     name: '',
     email: '',

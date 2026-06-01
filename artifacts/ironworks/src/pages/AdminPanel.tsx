@@ -266,7 +266,7 @@ export function AdminPanel() {
   };
 
   const handleDeleteOrder = (id: string) => {
-    setConfirm({ msg: 'Delete this order permanently?', onConfirm: () => { deleteOrder(id); setOrders(getOrders()); setConfirm(null); } });
+    setConfirm({ msg: 'Delete this purchase inquiry permanently?', onConfirm: () => { deleteOrder(id); setOrders(getOrders()); setConfirm(null); } });
   };
   const handleDeleteInquiry = (id: string) => {
     setConfirm({ msg: 'Delete this inquiry permanently?', onConfirm: () => { deleteInquiry(id); setInquiries(getInquiries()); setConfirm(null); } });
@@ -283,7 +283,7 @@ export function AdminPanel() {
     { id: 'etsy', label: 'Shop Products', icon: ShoppingBag, badge: etsyProducts.length },
     { id: 'premium', label: 'Signature Pieces', icon: Gem, badge: premiumProducts.length },
     { id: 'inquiries', label: 'Inquiries', icon: MessageSquare, badge: inquiries.length },
-    { id: 'orders', label: 'Orders', icon: ClipboardList, badge: orders.length },
+    { id: 'orders', label: 'Purchase Inquiries', icon: ClipboardList, badge: orders.length },
     { id: 'analytics', label: 'Analytics', icon: BarChart2 },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
@@ -346,7 +346,7 @@ export function AdminPanel() {
                 <StatCard label="Shop Products" value={etsyProducts.length} icon={ShoppingBag} />
                 <StatCard label="Signature Pieces" value={premiumProducts.length} icon={Gem} />
                 <StatCard label="Inquiries" value={inquiries.length} icon={MessageSquare} />
-                <StatCard label="Orders" value={orders.length} icon={ClipboardList} />
+                <StatCard label="Purchase Inquiries" value={orders.length} icon={ClipboardList} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="rounded-xl p-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
@@ -359,8 +359,8 @@ export function AdminPanel() {
                   ))}
                 </div>
                 <div className="rounded-xl p-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                  <h3 className="font-display uppercase tracking-widest text-sm text-white/50 mb-4">Recent Orders</h3>
-                  {orders.length === 0 ? <p className="text-white/25 text-sm">No orders yet.</p> : orders.slice(0, 3).map(o => (
+                  <h3 className="font-display uppercase tracking-widest text-sm text-white/50 mb-4">Recent Purchase Inquiries</h3>
+                  {orders.length === 0 ? <p className="text-white/25 text-sm">No purchase inquiries yet.</p> : orders.slice(0, 3).map(o => (
                     <div key={o.id} className="py-3 border-b border-white/5 last:border-0">
                       <p className="text-white/80 text-sm font-medium">{o.name}</p>
                       <p className="text-white/35 text-xs mt-0.5">{o.productTitle} · {o.productPrice}</p>
@@ -422,7 +422,7 @@ export function AdminPanel() {
           {/* PREMIUM PRODUCTS */}
           {tab === 'premium' && (
             <div>
-              <SectionHeader title="Signature Pieces" sub="High-end pieces with on-site ordering"
+              <SectionHeader title="Signature Pieces" sub="High-end pieces with direct inquiry forms"
                 action={
                   <button onClick={() => setPremiumModal({ open: true, editing: null })}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg font-display uppercase tracking-widest text-sm text-white"
@@ -499,14 +499,14 @@ export function AdminPanel() {
             </div>
           )}
 
-          {/* ORDERS */}
+          {/* PURCHASE INQUIRIES */}
           {tab === 'orders' && (
             <div>
-              <SectionHeader title="Orders" sub="Signature piece order submissions" />
+              <SectionHeader title="Purchase Inquiries" sub="Direct interest forms for signature pieces. Etsy sales are handled on Etsy." />
               {orders.length === 0 ? (
                 <div className="rounded-xl flex flex-col items-center justify-center py-24 gap-3" style={{ border: '1px dashed rgba(255,255,255,0.1)' }}>
                   <ClipboardList size={32} className="text-white/15" />
-                  <p className="text-white/25 text-sm font-sans">No orders yet</p>
+                  <p className="text-white/25 text-sm font-sans">No purchase inquiries yet</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">
