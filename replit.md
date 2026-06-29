@@ -10,6 +10,11 @@ _Replace the heading above with the project's name, and this line with one sente
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
+- Commerce env:
+  - `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM`, `SMTP_USER`, `SMTP_PASS` — sends contact and purchase notifications through SMTP
+  - `ORDER_NOTIFICATION_TO` or `CONTACT_NOTIFICATION_TO` — recipient for submitted contact/purchase details, defaults to `dandsiron@yahoo.com`
+  - `QUICKBOOKS_PAYMENT_URL` — optional hosted QuickBooks payment link used after a pre-made item purchase request is created
+  - Full QuickBooks API charging still requires Intuit OAuth/payment credentials before live card processing should be enabled
 
 ## Stack
 
@@ -30,7 +35,7 @@ _Populate as you build — non-obvious choices a reader couldn't infer from the 
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+D&S Iron Works website for custom ironwork, pre-made fire pits, pre-made rocket stoves, Etsy products, contact requests, analytics, and backend-backed purchase requests.
 
 ## User preferences
 
@@ -38,7 +43,8 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Do not collect raw card details in the React app. QuickBooks payment should happen through a hosted/authorized QuickBooks payment flow.
+- Contact and purchase forms fall back to local browser storage in preview if the API is unavailable, but production should run the API server so SMTP notifications are sent.
 
 ## Pointers
 

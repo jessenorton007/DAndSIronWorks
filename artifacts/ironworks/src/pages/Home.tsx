@@ -5,11 +5,13 @@ import { Navigation } from "@/components/Navigation";
 import { Embers } from "@/components/Embers";
 import { GlassButton } from "@/components/GlassButton";
 import { CheckoutModal } from "@/components/CheckoutModal";
+import { PreMadePurchaseModal } from "@/components/PreMadePurchaseModal";
 import { FloatingContactBanner } from "@/components/FloatingContactBanner";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useEtsyProducts, usePremiumProducts } from "@/hooks/useAdminProducts";
 import { PremiumProduct } from "@/data/premium-products";
 import { services } from "@/data/services";
+import { PreMadeItem, preMadeItems } from "@/data/premade-items";
 import { useSeo } from "@/lib/seo";
 
 const processVideos = [
@@ -28,10 +30,10 @@ const processVideos = [
     aspect: 'wide',
   },
   {
-    title: 'Red-Hot Maple Leaf',
-    description: 'A custom maple leaf form glowing on the anvil before the final shaping and finish work.',
-    src: '/images/red-hot-maple-leaf-forging.mp4',
-    poster: '/images/red-hot-maple-leaf-poster.jpg',
+    title: 'Red-Hot Treble Clef',
+    description: 'A custom treble clef form glowing on the anvil before the final shaping and finish work.',
+    src: '/images/red-hot-treble-clef-forging.mp4',
+    poster: '/images/red-hot-treble-clef-poster.jpg',
     aspect: 'portrait',
   },
   {
@@ -105,25 +107,226 @@ function ProcessVideoCard({
   );
 }
 
+function PreMadeVideoTile({
+  video,
+  compact = false,
+}: {
+  video: NonNullable<PreMadeItem['videos']>[number];
+  compact?: boolean;
+}) {
+  return (
+    <article className="overflow-hidden rounded-xl bg-white/[0.025]" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="bg-black">
+        <video
+          controls
+          muted
+          playsInline
+          preload="none"
+          poster={video.poster}
+          aria-label={`${video.title} video`}
+          className={`w-full bg-black ${video.aspect === 'portrait' ? 'aspect-[9/16] max-h-[70vh] object-contain' : 'aspect-video object-cover'}`}
+        >
+          <source src={video.src} type="video/mp4" />
+        </video>
+      </div>
+      <div className={compact ? 'p-3' : 'p-4'}>
+        <h4 className="font-display text-sm uppercase tracking-wider text-white mb-1">{video.title}</h4>
+        <p className="text-white/45 text-xs font-sans leading-relaxed">{video.description}</p>
+      </div>
+    </article>
+  );
+}
+
+function PreMadeItemCard({
+  item,
+  delay,
+  onPurchase,
+}: {
+  item: PreMadeItem;
+  delay: number;
+  onPurchase: () => void;
+}) {
+  const isFirePit = item.id === 'pre-built-fire-pits';
+
+  if (isFirePit) {
+    return (
+      <motion.article
+        key={item.id}
+        initial={{ opacity: 0, y: 18 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-80px' }}
+        transition={{ delay }}
+        className="group rounded-2xl overflow-hidden bg-white/[0.025] lg:col-span-2"
+        style={{ border: '1px solid rgba(255,255,255,0.09)' }}
+      >
+        <div className="grid lg:grid-cols-[minmax(0,1.22fr)_minmax(22rem,0.78fr)] gap-0">
+          <div className="p-4 sm:p-5 lg:p-6">
+            <div className="relative aspect-[16/10] min-h-[18rem] rounded-xl overflow-hidden bg-black mb-4" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+              <img
+                src={item.image}
+                alt={item.alt}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/78 via-black/10 to-transparent" />
+              <div className="absolute left-5 bottom-5 right-5">
+                <span className="text-[10px] font-display tracking-[0.28em] uppercase text-orange-300/80 block mb-2">
+                  {item.eyebrow}
+                </span>
+                <h3 className="font-display text-2xl sm:text-4xl uppercase tracking-widest text-white">
+                  {item.title}
+                </h3>
+              </div>
+            </div>
+
+            {item.videos && (
+              <div className="grid md:grid-cols-[minmax(0,1fr)_minmax(13rem,0.48fr)] gap-4">
+                {item.videos.map((video, index) => (
+                  <PreMadeVideoTile key={video.src} video={video} compact={index > 0} />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="p-5 sm:p-6 lg:p-8 flex flex-col gap-5 bg-black/10 lg:border-l border-white/10">
+            <div>
+              <span className="text-[10px] font-display tracking-[0.28em] uppercase text-orange-300/75 block mb-2">
+                Portable Fire Pit Gallery
+              </span>
+              <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-widest text-white mb-3">
+                Pack-Flat Deer Panel Fire Pit
+              </h3>
+              <p className="text-white/58 text-sm font-sans leading-relaxed">
+                {item.description} The panel design packs down for transport, then locks into a sturdy outdoor fire pit with deer cutout details on each side.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {item.gallery.map((image) => (
+                <div key={image.src} className="aspect-[4/3] rounded-lg overflow-hidden bg-black/50" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <img src={image.src} alt={image.alt} className="w-full h-full object-cover" />
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {item.features.map((feature) => (
+                <span key={feature} className="rounded-full px-3 py-1 text-[10px] font-display tracking-widest uppercase text-white/50 bg-white/[0.035] border border-white/10">
+                  {feature}
+                </span>
+              ))}
+            </div>
+
+            <div className="mt-auto pt-3">
+              <div className="mb-4 flex items-end justify-between gap-4 border-t border-white/10 pt-4">
+                <span className="text-white/35 text-xs font-sans">Checkout status</span>
+                <span className="font-display text-xl tracking-wider text-forge-gradient text-right">{item.priceLabel}</span>
+              </div>
+              <p className="text-white/35 text-xs font-sans mb-4">{item.availability}</p>
+              <GlassButton onClick={onPurchase} className="text-sm px-5 py-2.5">
+                Start Purchase
+              </GlassButton>
+            </div>
+          </div>
+        </div>
+      </motion.article>
+    );
+  }
+
+  return (
+    <motion.article
+      key={item.id}
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-80px' }}
+      transition={{ delay }}
+      className="group rounded-2xl overflow-hidden bg-white/[0.025]"
+      style={{ border: '1px solid rgba(255,255,255,0.09)' }}
+    >
+      <div className="grid sm:grid-cols-[minmax(0,1.1fr)_minmax(0,0.8fr)] gap-0">
+        <div className="relative min-h-[18rem] sm:min-h-[24rem] overflow-hidden bg-black">
+          <img
+            src={item.image}
+            alt={item.alt}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+          <div className="absolute left-5 bottom-5 right-5">
+            <span className="text-[10px] font-display tracking-[0.28em] uppercase text-orange-300/80 block mb-2">
+              {item.eyebrow}
+            </span>
+            <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-widest text-white">
+              {item.title}
+            </h3>
+          </div>
+        </div>
+        <div className="p-5 sm:p-6 flex flex-col gap-5">
+          <p className="text-white/58 text-sm font-sans leading-relaxed">
+            {item.description}
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            {item.gallery.map((image) => (
+              <div key={image.src} className="aspect-[4/3] rounded-lg overflow-hidden bg-black/50" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+                <img src={image.src} alt={image.alt} className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+          {item.video && (
+            <video
+              controls
+              muted
+              playsInline
+              preload="none"
+              poster={item.video.poster}
+              aria-label={item.video.label}
+              className="w-full aspect-video rounded-lg object-cover bg-black"
+              style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+            >
+              <source src={item.video.src} type="video/mp4" />
+            </video>
+          )}
+          <div className="flex flex-wrap gap-2">
+            {item.features.map((feature) => (
+              <span key={feature} className="rounded-full px-3 py-1 text-[10px] font-display tracking-widest uppercase text-white/50 bg-white/[0.035] border border-white/10">
+                {feature}
+              </span>
+            ))}
+          </div>
+          <div className="mt-auto pt-1">
+            <div className="mb-4 flex items-end justify-between gap-4 border-t border-white/10 pt-4">
+              <span className="text-white/35 text-xs font-sans">Checkout status</span>
+              <span className="font-display text-xl tracking-wider text-forge-gradient text-right">{item.priceLabel}</span>
+            </div>
+            <p className="text-white/35 text-xs font-sans mb-4">{item.availability}</p>
+            <GlassButton onClick={onPurchase} className="text-sm px-5 py-2.5">
+              Start Purchase
+            </GlassButton>
+          </div>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
+
 export function Home() {
   const { scrollYProgress } = useScroll();
   const heroOpacity = useTransform(scrollYProgress, [0, 0.22], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 0.22], [1, 1.06]);
   const [checkoutProduct, setCheckoutProduct] = useState<PremiumProduct | null>(null);
+  const [purchaseItem, setPurchaseItem] = useState<PreMadeItem | null>(null);
   const [, navigate] = useLocation();
 
   const { products: etsyProducts } = useEtsyProducts();
   const { products: premiumProducts } = usePremiumProducts();
 
   useSeo({
-    title: 'D&S Iron Works | Custom Ironwork & Hand-Forged Metal Craft in Utah',
-    description: 'D&S Iron Works by Dallan Goff creates custom fireplaces, fire pits, metal signs, forged railings, sculptural ironwork, and hand-forged goods in Utah.',
+    title: 'D&S Iron Works | Custom Ironwork, Fire Pits & Rocket Stoves in Utah',
+    description: 'D&S Iron Works by Dallan Goff creates custom ironwork, pre-built fire pits, rocket stoves, metal signs, forged railings, sculptural ironwork, and hand-forged goods in Utah.',
     path: '/',
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
       name: 'D&S Iron Works',
-      description: 'Custom ironwork, forged metal art, fire pits, railings, signs, sculptures, and hand-forged goods by Dallan Goff.',
+      description: 'Custom ironwork, forged metal art, pre-built fire pits, rocket stoves, railings, signs, sculptures, and hand-forged goods by Dallan Goff.',
       image: typeof window === 'undefined' ? '/opengraph.jpg' : `${window.location.origin}/opengraph.jpg`,
       telephone: '+1-435-421-9033',
       email: 'dandsiron@yahoo.com',
@@ -227,8 +430,8 @@ export function Home() {
                 <span className="relative z-10">View Custom Work</span>
                 <div className="absolute inset-0 bg-white/0 hover:bg-white/10 transition-colors rounded-full" />
               </motion.button>
-              <GlassButton onClick={() => scrollTo('shop')} className="bg-white/3">
-                Shop Now
+              <GlassButton onClick={() => scrollTo('pre-made')} className="bg-white/3">
+                Pre-Made Items
               </GlassButton>
             </motion.div>
           </div>
@@ -452,6 +655,37 @@ export function Home() {
               </div>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* ── PRE-MADE ITEMS ───────────────────────────────────────────── */}
+      <section id="pre-made" className="relative py-20 sm:py-28 z-10 border-t border-white/5">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(255,77,0,0.06),transparent_58%)] pointer-events-none" />
+        <div className="container mx-auto px-5 sm:px-6 md:px-12 relative z-10">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-10 sm:mb-12">
+            <div>
+              <span className="text-xs font-display tracking-[0.3em] uppercase text-orange-400/70 block mb-3">
+                Built Ahead
+              </span>
+              <h2 className="font-display text-4xl sm:text-5xl md:text-6xl tracking-widest uppercase leading-none">
+                Pre-Made <span className="text-forge-gradient">Items</span>
+              </h2>
+            </div>
+            <p className="text-white/55 max-w-md font-sans font-light leading-relaxed">
+              Small-batch ready-built fire pits and rocket stoves. Same shop-built steel work, faster path to pickup or delivery.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {preMadeItems.map((item, i) => (
+              <PreMadeItemCard
+                key={item.id}
+                item={item}
+                delay={i * 0.08}
+                onPurchase={() => setPurchaseItem(item)}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -682,6 +916,7 @@ export function Home() {
               <div className="space-y-3">
                 {[
                   { label: 'Custom Designs', id: 'custom-designs' },
+                  { label: 'Pre-Made Items', id: 'pre-made' },
                   { label: 'Signature Pieces', id: 'premium' },
                   { label: 'Forge Shop', id: 'shop' },
                 ].map(({ label, id }) => (
@@ -714,6 +949,13 @@ export function Home() {
           product={checkoutProduct}
           isOpen={!!checkoutProduct}
           onClose={() => setCheckoutProduct(null)}
+        />
+      )}
+      {purchaseItem && (
+        <PreMadePurchaseModal
+          item={purchaseItem}
+          isOpen={!!purchaseItem}
+          onClose={() => setPurchaseItem(null)}
         />
       )}
     </div>

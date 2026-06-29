@@ -7,11 +7,13 @@ import { FloatingContactBanner } from '@/components/FloatingContactBanner';
 import { GlassButton } from '@/components/GlassButton';
 import { Embers } from '@/components/Embers';
 import { saveInquiry } from '@/hooks/useAdminProducts';
+import { submitContact } from '@/lib/commerce';
 import { useSeo } from '@/lib/seo';
 
 const PROJECT_TYPES = [
   'Custom Gate / Fence',
   'Fireplace / Fire Pit',
+  'Pre-built Fire Pit / Rocket Stove',
   'Stair Railing',
   'Wall Art / Sculpture',
   'Home Decor / Small Goods',
@@ -21,14 +23,14 @@ const PROJECT_TYPES = [
 export function ContactPage() {
   const [, navigate] = useLocation();
   useSeo({
-    title: 'Contact D&S Iron Works | Custom Ironwork Commissions in Utah',
-    description: 'Contact Dallan Goff at D&S Iron Works to start a custom ironwork, fire pit, metal sign, railing, forged art, or blacksmith commission in Utah.',
+    title: 'Contact D&S Iron Works | Custom Ironwork & Pre-Made Fire Pits',
+    description: 'Contact Dallan Goff at D&S Iron Works to ask about custom ironwork, pre-built fire pits, rocket stoves, metal signs, railings, forged art, or blacksmith commissions in Utah.',
     path: '/contact',
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'ContactPage',
       name: 'Contact D&S Iron Works',
-      description: 'Start a custom ironwork project with D&S Iron Works.',
+      description: 'Start a custom ironwork project or ask about pre-made fire pits and rocket stoves from D&S Iron Works.',
     },
   });
 
@@ -46,14 +48,19 @@ export function ContactPage() {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      await submitContact(form);
       saveInquiry(form);
-      setSubmitting(false);
       setSubmitted(true);
-    }, 800);
+    } catch {
+      saveInquiry(form);
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputCls = `

@@ -15,6 +15,7 @@ const routes = [
   '/services',
   '/services/custom-ironwork-utah',
   '/services/custom-fire-pits',
+  '/services/pre-built-fire-pits-rocket-stoves',
   '/services/forged-railings',
   '/services/custom-metal-signs',
   '/services/forged-metal-art',

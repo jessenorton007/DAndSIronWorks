@@ -37,10 +37,10 @@ export function Navigation() {
   };
 
   const navLinks = [
-    { name: 'Custom Designs', action: () => scrollTo('custom-designs') },
+    { name: 'Custom', action: () => scrollTo('custom-designs') },
+    { name: 'Pre-Made', action: () => scrollTo('pre-made') },
     { name: 'Services', action: goServices },
     { name: 'Shop', action: () => scrollTo('shop') },
-    { name: 'Premium', action: () => scrollTo('premium') },
     { name: 'Contact', action: goContact },
   ];
 

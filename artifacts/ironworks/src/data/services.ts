@@ -45,6 +45,22 @@ export const services: ServicePage[] = [
     examples: ['Ranch fire pits', 'Family-name fire pits', 'Wildlife cutouts', 'Cabin fire features'],
   },
   {
+    slug: 'pre-built-fire-pits-rocket-stoves',
+    title: 'Pre-Built Fire Pits & Rocket Stoves',
+    shortTitle: 'Pre-Made Items',
+    metaTitle: 'Pre-Built Fire Pits & Rocket Stoves | D&S Iron Works',
+    metaDescription: 'Pre-built steel fire pits and rocket stoves by D&S Iron Works, including ready-made outdoor fire features, cooking stoves, and small-batch shop-built pieces.',
+    eyebrow: 'Ready-Made Steel',
+    heroImage: '/images/premade-fire-pit-cabin.jpg',
+    summary: 'D&S Iron Works builds small runs of ready-made fire pits and rocket stoves for customers who want shop-built steel without starting from a blank custom design.',
+    details: [
+      'Ready-made and small-batch builds available as inventory allows',
+      'Pre-built steel fire pits with outdoor-ready construction',
+      'Rocket stoves with wood-fed fireboxes and cooking surfaces',
+    ],
+    examples: ['Pre-built fire pits', 'Rocket stoves', 'Camp cooking stoves', 'Outdoor gathering pieces'],
+  },
+  {
     slug: 'forged-railings',
     title: 'Forged Railings',
     shortTitle: 'Railings',
