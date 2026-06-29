@@ -53,6 +53,7 @@ export function PreMadePurchaseModal({ item, isOpen, onClose }: PreMadePurchaseM
       productTitle: item.title,
       productType: "Pre-made item",
       priceLabel: item.priceLabel,
+      paymentUrl: item.paymentUrl,
       quantity: Math.max(1, Number(form.quantity || 1)),
       customer: {
         name: form.name,
@@ -172,7 +173,7 @@ export function PreMadePurchaseModal({ item, isOpen, onClose }: PreMadePurchaseM
                       <span className="font-display text-2xl text-forge-gradient text-right">{item.priceLabel}</span>
                     </div>
                     <p className="text-white/30 text-xs font-sans leading-relaxed mt-4">
-                      QuickBooks handles payment once the backend payment link is configured. No card details are collected on this site.
+                      QuickBooks handles payment after your buyer and shipping details are submitted. No card details are collected on this site.
                     </p>
                   </div>
 
@@ -209,7 +210,7 @@ export function PreMadePurchaseModal({ item, isOpen, onClose }: PreMadePurchaseM
                       {isSubmitting ? "Starting Purchase..." : "Start Purchase"}
                     </GlassButton>
                     <p className="text-center text-xs text-white/25 font-sans">
-                      D&S receives the order details by email; QuickBooks handles payment when configured.
+                      D&S receives the order details by email; QuickBooks handles the payment.
                     </p>
                   </form>
                 </div>

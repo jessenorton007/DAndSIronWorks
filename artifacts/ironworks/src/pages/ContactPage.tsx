@@ -13,7 +13,7 @@ import { useSeo } from '@/lib/seo';
 const PROJECT_TYPES = [
   'Custom Gate / Fence',
   'Fireplace / Fire Pit',
-  'Pre-built Fire Pit / Rocket Stove',
+  'Pre-built Fire Pit / Iron Rocket Stove',
   'Stair Railing',
   'Wall Art / Sculpture',
   'Home Decor / Small Goods',
@@ -24,13 +24,13 @@ export function ContactPage() {
   const [, navigate] = useLocation();
   useSeo({
     title: 'Contact D&S Iron Works | Custom Ironwork & Pre-Made Fire Pits',
-    description: 'Contact Dallan Goff at D&S Iron Works to ask about custom ironwork, pre-built fire pits, rocket stoves, metal signs, railings, forged art, or blacksmith commissions in Utah.',
+    description: 'Contact Dallan Goff at D&S Iron Works to ask about custom ironwork, pre-built fire pits, Iron Rocket Stove and Iron Rocket XL camp cooking stoves, metal signs, railings, forged art, or blacksmith commissions in Utah.',
     path: '/contact',
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'ContactPage',
       name: 'Contact D&S Iron Works',
-      description: 'Start a custom ironwork project or ask about pre-made fire pits and rocket stoves from D&S Iron Works.',
+      description: 'Start a custom ironwork project or ask about pre-made fire pits, Iron Rocket Stove, and Iron Rocket XL from D&S Iron Works.',
     },
   });
 

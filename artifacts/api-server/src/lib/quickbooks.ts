@@ -4,6 +4,7 @@ export interface QuickBooksPaymentRequest {
   priceLabel: string;
   quantity: number;
   customerEmail: string;
+  paymentUrl?: string;
 }
 
 export interface QuickBooksPaymentResult {
@@ -15,12 +16,12 @@ export interface QuickBooksPaymentResult {
 export async function createQuickBooksPaymentRequest(
   request: QuickBooksPaymentRequest,
 ): Promise<QuickBooksPaymentResult> {
-  const paymentUrl = process.env["QUICKBOOKS_PAYMENT_URL"];
+  const paymentUrl = request.paymentUrl || process.env["QUICKBOOKS_PAYMENT_URL"];
   if (paymentUrl) {
     const url = new URL(paymentUrl);
-    url.searchParams.set("order", request.orderId);
-    url.searchParams.set("item", request.productTitle);
-    url.searchParams.set("email", request.customerEmail);
+    if (url.hostname !== "connect.intuit.com") {
+      throw new Error("Invalid QuickBooks payment link");
+    }
     return {
       status: "payment_link_ready",
       paymentUrl: url.toString(),

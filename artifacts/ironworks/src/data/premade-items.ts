@@ -12,6 +12,7 @@ export type PreMadeItem = {
     poster: string;
     label: string;
   };
+  paymentUrl?: string;
   videos?: {
     src: string;
     poster: string;
@@ -32,7 +33,8 @@ export const preMadeItems: PreMadeItem[] = [
       'Heavy steel fire pits with cut wildlife details, outdoor-ready construction, and the same D&S shop finish as custom work.',
     image: '/images/portable-fire-pit-walkaround-poster.jpg',
     alt: 'Portable steel fire pit with deer cutout panels',
-    priceLabel: 'Quote before payment',
+    priceLabel: '$375',
+    paymentUrl: 'https://connect.intuit.com/pay/DAndSIronWorksLlc/scs-v1-182eed4f16ef4dc4bbeee73b7ed815324ca44c73fd494477b9700a2b0e77fe845b8269d566cf4bfda2d4572bf26b77d1-0?locale=EN_US&cta=saveandcopylink',
     gallery: [
       {
         src: '/images/premade-fire-pit-camp.jpg',
@@ -68,37 +70,73 @@ export const preMadeItems: PreMadeItem[] = [
     availability: 'Ask what is ready now or reserve the next batch.',
   },
   {
-    id: 'pre-built-rocket-stoves',
-    title: 'Pre-Built Rocket Stoves',
-    eyebrow: 'Cook + Heat',
+    id: 'iron-rocket-stove',
+    title: 'Iron Rocket Stove',
+    eyebrow: 'Regular Size',
     description:
-      'Compact wood-fed rocket stoves with flat-top cooking space, griddle options, and efficient firebox heat for camp cooking.',
+      'Regular-size wood-fed rocket stove with flat-top cooking space, griddle options, and efficient firebox heat for camp cooking.',
     image: '/images/premade-rocket-stove-griddle.jpg',
-    alt: 'Pre-built rocket stove with griddle cooking food outdoors',
-    priceLabel: 'Quote before payment',
+    alt: 'Iron Rocket Stove with griddle cooking food outdoors',
+    priceLabel: '$2,020',
+    paymentUrl: 'https://connect.intuit.com/pay/DAndSIronWorksLlc/scs-v1-99e7ec3cef364562a04c8801e07a0a08c9e5dddec37b4f5bb3d58c9183ee65eca0bbb3ac91e24e1d93393564c236de8c-0?locale=EN_US&cta=saveandcopylink',
     gallery: [
       {
         src: '/images/premade-rocket-stove-griddle.jpg',
-        alt: 'Rocket stove griddle cooking meat and potatoes',
+        alt: 'Iron Rocket Stove griddle cooking meat and potatoes',
       },
       {
         src: '/images/premade-rocket-stove-cooking.jpg',
-        alt: 'Rocket stove burning wood below a flat cooking top',
+        alt: 'Iron Rocket Stove burning wood below a flat cooking top',
       },
       {
         src: '/images/premade-rocket-stove-branded-side.jpg',
-        alt: 'D and S Iron Works rocket stove side plate and firebox detail',
+        alt: 'D and S Iron Works Iron Rocket Stove side plate and firebox detail',
       },
       {
         src: '/images/premade-rocket-stove-firebox.jpg',
-        alt: 'Close view of pre-built rocket stove firebox and chimney',
+        alt: 'Close view of Iron Rocket Stove firebox and chimney',
       },
       {
         src: '/images/premade-rocket-stove-logo-detail.jpg',
-        alt: 'Branded D and S Iron Works rocket stove side detail',
+        alt: 'Branded D and S Iron Works Iron Rocket Stove side detail',
       },
     ],
     features: ['Wood-fed firebox', 'Flat-top cooking surface', 'Portable outdoor setup'],
+    availability: 'Built in small runs. Call or text for current availability.',
+  },
+  {
+    id: 'iron-rocket-xl',
+    title: 'Iron Rocket XL',
+    eyebrow: 'Large Size',
+    description:
+      'Large wood-fed rocket stove with more cooking surface, a bigger outdoor footprint, and the same rugged D&S steel build.',
+    image: '/images/premade-rocket-stove-cooking.jpg',
+    alt: 'Iron Rocket XL outdoor cooking rocket stove',
+    priceLabel: '$2,320',
+    paymentUrl: 'https://connect.intuit.com/pay/DAndSIronWorksLlc/scs-v1-85749b09e6144582b26bf90f889c6422142301ef619b49a4bdf622cc8ee2576c837621eb4ded404abb73314dbcca41fa-0?locale=EN_US&cta=saveandcopylink',
+    gallery: [
+      {
+        src: '/images/premade-rocket-stove-cooking.jpg',
+        alt: 'Iron Rocket XL burning wood below a flat cooking top',
+      },
+      {
+        src: '/images/premade-rocket-stove-griddle.jpg',
+        alt: 'Iron Rocket XL griddle cooking meat and potatoes',
+      },
+      {
+        src: '/images/premade-rocket-stove-firebox.jpg',
+        alt: 'Close view of Iron Rocket XL firebox and chimney',
+      },
+      {
+        src: '/images/premade-rocket-stove-branded-side.jpg',
+        alt: 'D and S Iron Works Iron Rocket XL side plate and firebox detail',
+      },
+      {
+        src: '/images/premade-rocket-stove-logo-detail.jpg',
+        alt: 'Branded D and S Iron Works Iron Rocket XL side detail',
+      },
+    ],
+    features: ['Larger cooking surface', 'Wood-fed firebox', 'Heavy steel build'],
     availability: 'Built in small runs. Call or text for current availability.',
   },
 ];

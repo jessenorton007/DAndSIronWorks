@@ -3,6 +3,7 @@ export interface PurchasePayload {
   productTitle: string;
   productType: string;
   priceLabel: string;
+  paymentUrl?: string;
   quantity: number;
   customer: {
     name: string;

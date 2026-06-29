@@ -12,8 +12,8 @@ export function ServicesPage() {
   const [, navigate] = useLocation();
 
   useSeo({
-    title: 'Custom Ironwork, Fire Pits & Rocket Stoves in Utah | D&S Iron Works',
-    description: 'Explore D&S Iron Works services: custom ironwork, pre-built fire pits, rocket stoves, forged railings, metal signs, forged metal art, and blacksmith commissions in Utah.',
+    title: 'Custom Ironwork, Fire Pits & Iron Rocket Stoves in Utah | D&S Iron Works',
+    description: 'Explore D&S Iron Works services: custom ironwork, pre-built fire pits, Iron Rocket Stove and Iron Rocket XL camp cooking stoves, forged railings, metal signs, forged metal art, and blacksmith commissions in Utah.',
     path: '/services',
     jsonLd: {
       '@context': 'https://schema.org',
@@ -55,7 +55,7 @@ export function ServicesPage() {
               </h1>
             </div>
             <p className="text-white/55 max-w-md font-sans font-light leading-relaxed">
-              D&S Iron Works builds custom fire pits, pre-built fire pits, rocket stoves,
+              D&S Iron Works builds custom fire pits, pre-built fire pits, Iron Rocket Stoves,
               forged railings, personalized metal signs, sculptural ironwork, and one-of-a-kind blacksmith commissions.
             </p>
           </div>

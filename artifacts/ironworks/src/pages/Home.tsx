@@ -218,7 +218,7 @@ function PreMadeItemCard({
 
             <div className="mt-auto pt-3">
               <div className="mb-4 flex items-end justify-between gap-4 border-t border-white/10 pt-4">
-                <span className="text-white/35 text-xs font-sans">Checkout status</span>
+                <span className="text-white/35 text-xs font-sans">Price</span>
                 <span className="font-display text-xl tracking-wider text-forge-gradient text-right">{item.priceLabel}</span>
               </div>
               <p className="text-white/35 text-xs font-sans mb-4">{item.availability}</p>
@@ -293,7 +293,7 @@ function PreMadeItemCard({
           </div>
           <div className="mt-auto pt-1">
             <div className="mb-4 flex items-end justify-between gap-4 border-t border-white/10 pt-4">
-              <span className="text-white/35 text-xs font-sans">Checkout status</span>
+              <span className="text-white/35 text-xs font-sans">Price</span>
               <span className="font-display text-xl tracking-wider text-forge-gradient text-right">{item.priceLabel}</span>
             </div>
             <p className="text-white/35 text-xs font-sans mb-4">{item.availability}</p>
@@ -319,14 +319,14 @@ export function Home() {
   const { products: premiumProducts } = usePremiumProducts();
 
   useSeo({
-    title: 'D&S Iron Works | Custom Ironwork, Fire Pits & Rocket Stoves in Utah',
-    description: 'D&S Iron Works by Dallan Goff creates custom ironwork, pre-built fire pits, rocket stoves, metal signs, forged railings, sculptural ironwork, and hand-forged goods in Utah.',
+    title: 'D&S Iron Works | Custom Ironwork, Fire Pits & Iron Rocket Stoves in Utah',
+    description: 'D&S Iron Works by Dallan Goff creates custom ironwork, pre-built fire pits, Iron Rocket Stove and Iron Rocket XL camp cooking stoves, metal signs, forged railings, sculptural ironwork, and hand-forged goods in Utah.',
     path: '/',
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
       name: 'D&S Iron Works',
-      description: 'Custom ironwork, forged metal art, pre-built fire pits, rocket stoves, railings, signs, sculptures, and hand-forged goods by Dallan Goff.',
+      description: 'Custom ironwork, forged metal art, pre-built fire pits, Iron Rocket Stove and Iron Rocket XL camp cooking stoves, railings, signs, sculptures, and hand-forged goods by Dallan Goff.',
       image: typeof window === 'undefined' ? '/opengraph.jpg' : `${window.location.origin}/opengraph.jpg`,
       telephone: '+1-435-421-9033',
       email: 'dandsiron@yahoo.com',
@@ -672,7 +672,7 @@ export function Home() {
               </h2>
             </div>
             <p className="text-white/55 max-w-md font-sans font-light leading-relaxed">
-              Small-batch ready-built fire pits and rocket stoves. Same shop-built steel work, faster path to pickup or delivery.
+              Small-batch ready-built fire pits, Iron Rocket Stoves, and Iron Rocket XL stoves. Same shop-built steel work, faster path to pickup or delivery.
             </p>
           </div>
 

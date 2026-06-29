@@ -166,6 +166,7 @@ router.post("/commerce/purchase-intents", async (req, res) => {
       priceLabel: order.priceLabel,
       quantity: order.quantity,
       customerEmail: order.customer.email,
+      paymentUrl: text(body["paymentUrl"], 2000),
     });
     order.paymentStatus = payment.status;
     order.paymentUrl = payment.paymentUrl;
