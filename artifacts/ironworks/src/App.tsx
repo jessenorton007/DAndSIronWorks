@@ -9,6 +9,7 @@ import { ProductPage } from "@/pages/ProductPage";
 import { ContactPage } from "@/pages/ContactPage";
 import { ServicesPage } from "@/pages/ServicesPage";
 import { ServiceDetailPage } from "@/pages/ServiceDetailPage";
+import { PreMadeDetailPage } from "@/pages/PreMadeDetailPage";
 import { AdminPanel } from "@/pages/AdminPanel";
 import { AdminGear } from "@/components/AdminGear";
 import { init as initTracker } from "@/analytics/tracker";
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/preview.html" component={Home} />
       <Route path="/shop/:id" component={ProductPage} />
+      <Route path="/pre-made/:id" component={PreMadeDetailPage} />
       <Route path="/services" component={ServicesPage} />
       <Route path="/services/:slug" component={ServiceDetailPage} />
       <Route path="/contact" component={ContactPage} />

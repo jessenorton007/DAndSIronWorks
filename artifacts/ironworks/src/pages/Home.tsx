@@ -8,10 +8,10 @@ import { CheckoutModal } from "@/components/CheckoutModal";
 import { PreMadePurchaseModal } from "@/components/PreMadePurchaseModal";
 import { FloatingContactBanner } from "@/components/FloatingContactBanner";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { useEtsyProducts, usePremiumProducts } from "@/hooks/useAdminProducts";
+import { useEtsyProducts, usePremiumProducts, usePreMadeProducts } from "@/hooks/useAdminProducts";
 import { PremiumProduct } from "@/data/premium-products";
 import { services } from "@/data/services";
-import { PreMadeItem, preMadeItems } from "@/data/premade-items";
+import { PreMadeItem } from "@/data/premade-items";
 import { useSeo } from "@/lib/seo";
 
 const processVideos = [
@@ -141,10 +141,12 @@ function PreMadeItemCard({
   item,
   delay,
   onPurchase,
+  onDetails,
 }: {
   item: PreMadeItem;
   delay: number;
   onPurchase: () => void;
+  onDetails: () => void;
 }) {
   const isFirePit = item.id === 'pre-built-fire-pits';
 
@@ -222,9 +224,14 @@ function PreMadeItemCard({
                 <span className="font-display text-xl tracking-wider text-forge-gradient text-right">{item.priceLabel}</span>
               </div>
               <p className="text-white/35 text-xs font-sans mb-4">{item.availability}</p>
-              <GlassButton onClick={onPurchase} className="text-sm px-5 py-2.5">
-                Start Purchase
-              </GlassButton>
+              <div className="flex flex-wrap gap-3">
+                <GlassButton onClick={onDetails} className="text-sm px-5 py-2.5 bg-white/3">
+                  View Details
+                </GlassButton>
+                <GlassButton onClick={onPurchase} className="text-sm px-5 py-2.5">
+                  Start Purchase
+                </GlassButton>
+              </div>
             </div>
           </div>
         </div>
@@ -297,9 +304,14 @@ function PreMadeItemCard({
               <span className="font-display text-xl tracking-wider text-forge-gradient text-right">{item.priceLabel}</span>
             </div>
             <p className="text-white/35 text-xs font-sans mb-4">{item.availability}</p>
-            <GlassButton onClick={onPurchase} className="text-sm px-5 py-2.5">
-              Start Purchase
-            </GlassButton>
+            <div className="flex flex-wrap gap-3">
+              <GlassButton onClick={onDetails} className="text-sm px-5 py-2.5 bg-white/3">
+                View Details
+              </GlassButton>
+              <GlassButton onClick={onPurchase} className="text-sm px-5 py-2.5">
+                Start Purchase
+              </GlassButton>
+            </div>
           </div>
         </div>
       </div>
@@ -317,6 +329,7 @@ export function Home() {
 
   const { products: etsyProducts } = useEtsyProducts();
   const { products: premiumProducts } = usePremiumProducts();
+  const { products: preMadeProducts } = usePreMadeProducts();
 
   useSeo({
     title: 'D&S Iron Works | Custom Ironwork, Fire Pits & Iron Rocket Stoves in Utah',
@@ -677,12 +690,13 @@ export function Home() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {preMadeItems.map((item, i) => (
+            {preMadeProducts.map((item, i) => (
               <PreMadeItemCard
                 key={item.id}
                 item={item}
                 delay={i * 0.08}
                 onPurchase={() => setPurchaseItem(item)}
+                onDetails={() => navigate(`/pre-made/${item.id}`)}
               />
             ))}
           </div>

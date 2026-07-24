@@ -1,9 +1,11 @@
 import { useState, useCallback } from 'react';
 import { EtsyProduct, defaultEtsyProducts } from '@/data/etsy-products';
 import { PremiumProduct, defaultPremiumProducts } from '@/data/premium-products';
+import { PreMadeItem, preMadeItems as defaultPreMadeItems } from '@/data/premade-items';
 
 const ETSY_KEY = 'ds_etsy_products_v2';
 const PREMIUM_KEY = 'ds_premium_products_v2';
+const PREMADE_KEY = 'ds_premade_products_v1';
 const ORDERS_KEY = 'ds_orders';
 const INQUIRIES_KEY = 'ds_inquiries';
 
@@ -86,6 +88,33 @@ export function usePremiumProducts() {
 
   const removeProduct = useCallback((id: string) => {
     const all = readStorage<PremiumProduct[]>(PREMIUM_KEY, defaultPremiumProducts);
+    setProducts(all.filter(x => x.id !== id));
+  }, [setProducts]);
+
+  return { products, setProducts, addProduct, updateProduct, removeProduct };
+}
+
+export function usePreMadeProducts() {
+  const [products, setProductsState] = useState<PreMadeItem[]>(() =>
+    readStorage<PreMadeItem[]>(PREMADE_KEY, defaultPreMadeItems)
+  );
+
+  const setProducts = useCallback((updated: PreMadeItem[]) => {
+    setProductsState(updated);
+    localStorage.setItem(PREMADE_KEY, JSON.stringify(updated));
+  }, []);
+
+  const addProduct = useCallback((p: PreMadeItem) => {
+    setProducts([...readStorage<PreMadeItem[]>(PREMADE_KEY, defaultPreMadeItems), p]);
+  }, [setProducts]);
+
+  const updateProduct = useCallback((p: PreMadeItem) => {
+    const all = readStorage<PreMadeItem[]>(PREMADE_KEY, defaultPreMadeItems);
+    setProducts(all.map(x => x.id === p.id ? p : x));
+  }, [setProducts]);
+
+  const removeProduct = useCallback((id: string) => {
+    const all = readStorage<PreMadeItem[]>(PREMADE_KEY, defaultPreMadeItems);
     setProducts(all.filter(x => x.id !== id));
   }, [setProducts]);
 

@@ -140,3 +140,5 @@ export const preMadeItems: PreMadeItem[] = [
     availability: 'Built in small runs. Call or text for current availability.',
   },
 ];
+
+export const getPreMadeItem = (id: string | undefined) => preMadeItems.find((item) => item.id === id);

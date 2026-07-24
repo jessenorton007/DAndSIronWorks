@@ -4,20 +4,21 @@ import { useLocation } from 'wouter';
 import {
   LayoutDashboard, ShoppingBag, Gem, MessageSquare,
   ClipboardList, Settings, LogOut, Plus, Pencil,
-  Trash2, X, Upload, ExternalLink, ChevronDown, ChevronUp, Check, BarChart2
+  Trash2, X, Upload, ExternalLink, ChevronDown, Check, BarChart2, Flame
 } from 'lucide-react';
 import {
-  useEtsyProducts, usePremiumProducts,
+  useEtsyProducts, usePremiumProducts, usePreMadeProducts,
   getOrders, getInquiries, deleteOrder, deleteInquiry,
   Order, Inquiry
 } from '@/hooks/useAdminProducts';
 import { EtsyProduct } from '@/data/etsy-products';
 import { PremiumProduct } from '@/data/premium-products';
+import { PreMadeItem } from '@/data/premade-items';
 import { AnalyticsTab } from './AnalyticsTab';
 
 const SESSION_KEY = 'ds_admin_auth';
 
-type Tab = 'overview' | 'etsy' | 'premium' | 'inquiries' | 'orders' | 'analytics' | 'settings';
+type Tab = 'overview' | 'premade' | 'etsy' | 'premium' | 'inquiries' | 'orders' | 'analytics' | 'settings';
 
 const SETTINGS_KEY = 'ds_site_settings';
 interface SiteSettings { phone: string; email: string; facebook: string; }
@@ -170,6 +171,139 @@ function PremiumForm({ initial, onSave, onClose }: { initial: PremiumProduct | n
   );
 }
 
+// ── Pre-made product form ────────────────────────────────────────
+const emptyPreMade = (): PreMadeItem => ({
+  id: '',
+  title: '',
+  eyebrow: 'Ready-Built',
+  description: '',
+  image: '',
+  alt: '',
+  priceLabel: '',
+  paymentUrl: '',
+  gallery: [],
+  features: [],
+  availability: 'Built in small runs. Call or text for current availability.',
+});
+
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+
+function PreMadeForm({ initial, onSave, onClose }: { initial: PreMadeItem | null; onSave: (p: PreMadeItem) => void; onClose: () => void }) {
+  const [f, setF] = useState<PreMadeItem>(initial ?? emptyPreMade());
+  const [featuresText, setFeaturesText] = useState((initial?.features ?? []).join('\n'));
+  const [galleryText, setGalleryText] = useState((initial?.gallery ?? []).map(image => `${image.src} | ${image.alt}`).join('\n'));
+  const [videoText, setVideoText] = useState(
+    (initial?.videos ?? []).map(video => `${video.src} | ${video.poster} | ${video.title} | ${video.description} | ${video.aspect}`).join('\n')
+  );
+  const [primaryVideo, setPrimaryVideo] = useState(initial?.video ?? { src: '', poster: '', label: '' });
+  const set = (k: keyof PreMadeItem, v: any) => setF(p => ({ ...p, [k]: v }));
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const id = f.id || slugify(f.title) || `pm_${Date.now()}`;
+    const features = featuresText.split('\n').map(s => s.trim()).filter(Boolean);
+    const gallery = galleryText.split('\n').map(line => {
+      const [src = '', alt = ''] = line.split('|').map(part => part.trim());
+      return { src, alt: alt || f.title };
+    }).filter(image => image.src);
+    const videos = videoText.split('\n').map(line => {
+      const [src = '', poster = '', title = '', description = '', aspect = 'wide'] = line.split('|').map(part => part.trim());
+      return {
+        src,
+        poster,
+        title: title || f.title,
+        description,
+        aspect: aspect === 'portrait' ? 'portrait' as const : 'wide' as const,
+      };
+    }).filter(video => video.src && video.poster);
+    onSave({
+      ...f,
+      id,
+      alt: f.alt || f.title,
+      gallery,
+      features,
+      videos: videos.length ? videos : undefined,
+      video: primaryVideo.src && primaryVideo.poster ? primaryVideo : undefined,
+    });
+  };
+
+  return (
+    <form onSubmit={submit} className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Title *</label>
+          <input required value={f.title} onChange={e => set('title', e.target.value)} placeholder="Iron Rocket Stove" className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+        </div>
+        <div>
+          <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Price *</label>
+          <input required value={f.priceLabel} onChange={e => set('priceLabel', e.target.value)} placeholder="$375" className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Page ID</label>
+          <input value={f.id} readOnly={!!initial} onChange={e => set('id', slugify(e.target.value))} placeholder="auto-created-from-title" className={inputCls(initial ? 'text-white/35' : '')} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+        </div>
+        <div>
+          <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Eyebrow</label>
+          <input value={f.eyebrow} onChange={e => set('eyebrow', e.target.value)} placeholder="Regular Size" className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+        </div>
+      </div>
+      <div>
+        <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Main Image</label>
+        <ImageField value={f.image} onChange={v => set('image', v)} />
+      </div>
+      <div>
+        <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Image Alt Text</label>
+        <input value={f.alt} onChange={e => set('alt', e.target.value)} placeholder="Describe the image for SEO/accessibility" className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+      </div>
+      <div>
+        <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Description *</label>
+        <textarea required rows={3} value={f.description} onChange={e => set('description', e.target.value)} placeholder="Describe this ready-built product..." className={inputCls('resize-none')} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+      </div>
+      <div>
+        <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">QuickBooks Payment Link</label>
+        <input value={f.paymentUrl ?? ''} onChange={e => set('paymentUrl', e.target.value)} placeholder="https://connect.intuit.com/pay/..." className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+      </div>
+      <div>
+        <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Gallery Images <span className="text-white/25 normal-case font-sans tracking-normal">one per line: image | alt text</span></label>
+        <textarea rows={4} value={galleryText} onChange={e => setGalleryText(e.target.value)} placeholder={"/images/example.jpg | Finished fire pit at sunset\n/images/detail.jpg | Close detail"} className={inputCls('resize-none')} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+      </div>
+      <div>
+        <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Features <span className="text-white/25 normal-case font-sans tracking-normal">one per line</span></label>
+        <textarea rows={3} value={featuresText} onChange={e => setFeaturesText(e.target.value)} placeholder={"Wood-fed firebox\nFlat-top cooking surface\nHeavy steel build"} className={inputCls('resize-none')} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+      </div>
+      <div>
+        <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Availability Note</label>
+        <input value={f.availability} onChange={e => set('availability', e.target.value)} className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+      </div>
+      <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <p className="text-xs font-display tracking-widest uppercase text-white/40 mb-3">Primary Showcase Video</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <input value={primaryVideo.src} onChange={e => setPrimaryVideo(v => ({ ...v, src: e.target.value }))} placeholder="/images/video.mp4" className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+          <input value={primaryVideo.poster} onChange={e => setPrimaryVideo(v => ({ ...v, poster: e.target.value }))} placeholder="/images/poster.jpg" className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+          <input value={primaryVideo.label} onChange={e => setPrimaryVideo(v => ({ ...v, label: e.target.value }))} placeholder="Video label" className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+        </div>
+      </div>
+      <div>
+        <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Additional Videos <span className="text-white/25 normal-case font-sans tracking-normal">one per line: video | poster | title | description | wide/portrait</span></label>
+        <textarea rows={4} value={videoText} onChange={e => setVideoText(e.target.value)} placeholder={"/images/walkaround.mp4 | /images/poster.jpg | Walkaround | Finished product view | wide"} className={inputCls('resize-none')} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+      </div>
+      <div className="flex gap-3 pt-2">
+        <button type="submit" className="flex-1 py-2.5 rounded-lg font-display uppercase tracking-widest text-sm text-white" style={{ background: 'linear-gradient(135deg,#FF4D00,#FF8C1A)', boxShadow: '0 4px 16px rgba(255,77,0,0.25)' }}>
+          {initial ? 'Save Changes' : 'Add Pre-Made Product'}
+        </button>
+        <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-lg text-white/40 hover:text-white transition-colors text-sm" style={iStyle}>Cancel</button>
+      </div>
+    </form>
+  );
+}
+
 // ── Modal wrapper ────────────────────────────────────────────────
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
@@ -177,7 +311,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={onClose} className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm" />
       <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
-        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-xl mx-4 max-h-[90vh] overflow-y-auto">
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="rounded-2xl p-7 relative" style={{ background: 'rgba(14,10,6,0.98)', border: '1px solid rgba(255,140,26,0.2)', boxShadow: '0 32px 80px rgba(0,0,0,0.8)' }}>
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-display text-lg uppercase tracking-widest text-white">{title}</h3>
@@ -246,11 +380,13 @@ export function AdminPanel() {
 
   const { products: etsyProducts, addProduct: addEtsy, updateProduct: updateEtsy, removeProduct: removeEtsy } = useEtsyProducts();
   const { products: premiumProducts, addProduct: addPremium, updateProduct: updatePremium, removeProduct: removePremium } = usePremiumProducts();
+  const { products: preMadeProducts, addProduct: addPreMade, updateProduct: updatePreMade, removeProduct: removePreMade } = usePreMadeProducts();
   const [orders, setOrders] = useState<Order[]>(() => getOrders());
   const [inquiries, setInquiries] = useState<Inquiry[]>(() => getInquiries());
 
   const [etsyModal, setEtsyModal] = useState<{ open: boolean; editing: EtsyProduct | null }>({ open: false, editing: null });
   const [premiumModal, setPremiumModal] = useState<{ open: boolean; editing: PremiumProduct | null }>({ open: false, editing: null });
+  const [preMadeModal, setPreMadeModal] = useState<{ open: boolean; editing: PreMadeItem | null }>({ open: false, editing: null });
   const [confirm, setConfirm] = useState<{ msg: string; onConfirm: () => void } | null>(null);
 
   const [settings, setSettings] = useState<SiteSettings>(getSettings());
@@ -280,6 +416,7 @@ export function AdminPanel() {
 
   const navItems: { id: Tab; label: string; icon: any; badge?: number }[] = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'premade', label: 'Pre-Made Products', icon: Flame, badge: preMadeProducts.length },
     { id: 'etsy', label: 'Shop Products', icon: ShoppingBag, badge: etsyProducts.length },
     { id: 'premium', label: 'Signature Pieces', icon: Gem, badge: premiumProducts.length },
     { id: 'inquiries', label: 'Inquiries', icon: MessageSquare, badge: inquiries.length },
@@ -342,7 +479,8 @@ export function AdminPanel() {
           {tab === 'overview' && (
             <div>
               <SectionHeader title="Overview" sub="D & S Iron Works admin dashboard" />
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                <StatCard label="Pre-Made Products" value={preMadeProducts.length} icon={Flame} />
                 <StatCard label="Shop Products" value={etsyProducts.length} icon={ShoppingBag} />
                 <StatCard label="Signature Pieces" value={premiumProducts.length} icon={Gem} />
                 <StatCard label="Inquiries" value={inquiries.length} icon={MessageSquare} />
@@ -368,6 +506,69 @@ export function AdminPanel() {
                   ))}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* PRE-MADE PRODUCTS */}
+          {tab === 'premade' && (
+            <div>
+              <SectionHeader title="Pre-Made Products" sub="Fire pits, Iron Rocket Stove, Iron Rocket XL, media, pricing, and QuickBooks links"
+                action={
+                  <button onClick={() => setPreMadeModal({ open: true, editing: null })}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg font-display uppercase tracking-widest text-sm text-white transition-all"
+                    style={{ background: 'linear-gradient(135deg,#FF4D00,#FF8C1A)', boxShadow: '0 4px 14px rgba(255,77,0,0.25)' }}>
+                    <Plus size={14} /> Add Pre-Made
+                  </button>
+                }
+              />
+              <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(255,140,26,0.06)', border: '1px solid rgba(255,140,26,0.18)' }}>
+                <p className="text-sm text-orange-100/75 font-sans leading-relaxed">
+                  Use this tab to change rocket stove pictures, reorder galleries, edit prices, and update QuickBooks payment links. Uploaded image files are saved in this browser; public site assets are still best for final production images.
+                </p>
+              </div>
+              {preMadeProducts.length === 0 ? (
+                <div className="rounded-xl flex flex-col items-center justify-center py-24 gap-4" style={{ border: '1px dashed rgba(255,255,255,0.1)' }}>
+                  <Flame size={32} className="text-white/15" />
+                  <p className="text-white/25 text-sm font-sans">No pre-made products yet</p>
+                  <button onClick={() => setPreMadeModal({ open: true, editing: null })} className="text-xs font-display tracking-widest uppercase text-orange-400/70 hover:text-orange-400 transition-colors">+ Add Pre-Made Product</button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                  {preMadeProducts.map(p => (
+                    <div key={p.id} className="rounded-xl overflow-hidden flex flex-col" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div className="aspect-[4/3] overflow-hidden bg-white/5">
+                        {p.image ? <img src={p.image} alt={p.alt || p.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Flame size={32} className="text-white/15" /></div>}
+                      </div>
+                      <div className="p-4 flex flex-col flex-1">
+                        <div className="flex items-start justify-between gap-3 mb-1">
+                          <p className="font-display uppercase tracking-wider text-white text-sm">{p.title}</p>
+                          <p className="text-orange-400/80 text-sm font-sans whitespace-nowrap">{p.priceLabel}</p>
+                        </div>
+                        <p className="text-white/25 text-xs font-sans mb-3">/{p.id}</p>
+                        <p className="text-white/35 text-xs font-sans flex-1 line-clamp-3">{p.description}</p>
+                        <div className="flex flex-wrap gap-1.5 mt-4">
+                          {p.features.slice(0, 3).map(feature => (
+                            <span key={feature} className="rounded-full px-2 py-0.5 text-[10px] font-display tracking-widest uppercase text-white/40 bg-white/[0.035] border border-white/10">
+                              {feature}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex gap-2 mt-4">
+                          <button onClick={() => setPreMadeModal({ open: true, editing: p })} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-white transition-colors flex-1 justify-center" style={iStyle}>
+                            <Pencil size={12} /> Edit
+                          </button>
+                          <button onClick={() => navigate(`/pre-made/${p.id}`)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-orange-400 transition-colors" style={iStyle}>
+                            <ExternalLink size={12} />
+                          </button>
+                          <button onClick={() => setConfirm({ msg: `Delete "${p.title}"?`, onConfirm: () => { removePreMade(p.id); setConfirm(null); } })} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/30 hover:text-red-400 transition-colors" style={iStyle}>
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -502,7 +703,7 @@ export function AdminPanel() {
           {/* PURCHASE INQUIRIES */}
           {tab === 'orders' && (
             <div>
-              <SectionHeader title="Purchase Inquiries" sub="Direct interest forms for signature pieces. Etsy sales are handled on Etsy." />
+              <SectionHeader title="Purchase Inquiries" sub="Pre-made product checkout requests. Payment continues through QuickBooks after the site captures buyer and shipping details." />
               {orders.length === 0 ? (
                 <div className="rounded-xl flex flex-col items-center justify-center py-24 gap-3" style={{ border: '1px dashed rgba(255,255,255,0.1)' }}>
                   <ClipboardList size={32} className="text-white/15" />
@@ -579,6 +780,12 @@ export function AdminPanel() {
         <Modal title={premiumModal.editing ? 'Edit Piece' : 'Add Signature Piece'} onClose={() => setPremiumModal({ open: false, editing: null })}>
           <PremiumForm initial={premiumModal.editing} onClose={() => setPremiumModal({ open: false, editing: null })}
             onSave={p => { premiumModal.editing ? updatePremium(p) : addPremium(p); setPremiumModal({ open: false, editing: null }); }} />
+        </Modal>
+      )}
+      {preMadeModal.open && (
+        <Modal title={preMadeModal.editing ? 'Edit Pre-Made Product' : 'Add Pre-Made Product'} onClose={() => setPreMadeModal({ open: false, editing: null })}>
+          <PreMadeForm initial={preMadeModal.editing} onClose={() => setPreMadeModal({ open: false, editing: null })}
+            onSave={p => { preMadeModal.editing ? updatePreMade(p) : addPreMade(p); setPreMadeModal({ open: false, editing: null }); }} />
         </Modal>
       )}
       {confirm && <Confirm msg={confirm.msg} onConfirm={confirm.onConfirm} onCancel={() => setConfirm(null)} />}

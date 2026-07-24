@@ -72,6 +72,7 @@ function fmDate(ts: number): string {
 function pageName(p: string): string {
   if (!p || p === '/') return 'Home';
   if (p.startsWith('/shop/')) return 'Product: ' + p.replace('/shop/', '');
+  if (p.startsWith('/pre-made/')) return 'Pre-Made: ' + p.replace('/pre-made/', '');
   if (p === '/contact') return 'Contact';
   if (p === '/admin') return 'Admin';
   return p;

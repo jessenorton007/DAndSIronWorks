@@ -15,11 +15,13 @@ const routes = [
   '/services',
   '/services/custom-ironwork-utah',
   '/services/custom-fire-pits',
-  '/services/pre-built-fire-pits-rocket-stoves',
   '/services/forged-railings',
   '/services/custom-metal-signs',
   '/services/forged-metal-art',
   '/services/blacksmith-commissions',
+  '/pre-made/pre-built-fire-pits',
+  '/pre-made/iron-rocket-stove',
+  '/pre-made/iron-rocket-xl',
   '/contact',
   '/shop/spiral-pendant-tree',
   '/shop/copper-nail-earrings',
@@ -41,7 +43,7 @@ const urls = routes.map((route) => `  <url>
     <loc>${siteUrl}${route}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${route === '/' ? 'weekly' : 'monthly'}</changefreq>
-    <priority>${route === '/' ? '1.0' : route.startsWith('/services') ? '0.8' : '0.6'}</priority>
+    <priority>${route === '/' ? '1.0' : route.startsWith('/services') || route.startsWith('/pre-made') ? '0.8' : '0.6'}</priority>
   </url>`).join('\n');
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
