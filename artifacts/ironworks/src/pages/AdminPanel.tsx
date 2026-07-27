@@ -4,7 +4,7 @@ import { useLocation } from 'wouter';
 import {
   LayoutDashboard, ShoppingBag, Gem, MessageSquare,
   ClipboardList, Settings, LogOut, Plus, Pencil,
-  Trash2, X, Upload, ExternalLink, ChevronDown, Check, BarChart2, Flame
+  Trash2, X, Upload, ExternalLink, ChevronDown, ChevronUp, Check, BarChart2, Flame
 } from 'lucide-react';
 import {
   useEtsyProducts, usePremiumProducts, usePreMadeProducts,
@@ -196,21 +196,31 @@ const slugify = (value: string) =>
 function PreMadeForm({ initial, onSave, onClose }: { initial: PreMadeItem | null; onSave: (p: PreMadeItem) => void; onClose: () => void }) {
   const [f, setF] = useState<PreMadeItem>(initial ?? emptyPreMade());
   const [featuresText, setFeaturesText] = useState((initial?.features ?? []).join('\n'));
-  const [galleryText, setGalleryText] = useState((initial?.gallery ?? []).map(image => `${image.src} | ${image.alt}`).join('\n'));
+  const [gallery, setGallery] = useState<PreMadeItem['gallery']>(initial?.gallery ?? []);
   const [videoText, setVideoText] = useState(
     (initial?.videos ?? []).map(video => `${video.src} | ${video.poster} | ${video.title} | ${video.description} | ${video.aspect}`).join('\n')
   );
   const [primaryVideo, setPrimaryVideo] = useState(initial?.video ?? { src: '', poster: '', label: '' });
   const set = (k: keyof PreMadeItem, v: any) => setF(p => ({ ...p, [k]: v }));
+  const setGalleryItem = (index: number, patch: Partial<PreMadeItem['gallery'][number]>) =>
+    setGallery(items => items.map((item, i) => i === index ? { ...item, ...patch } : item));
+  const moveGalleryItem = (index: number, direction: -1 | 1) => {
+    setGallery(items => {
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= items.length) return items;
+      const updated = [...items];
+      [updated[index], updated[nextIndex]] = [updated[nextIndex], updated[index]];
+      return updated;
+    });
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const id = f.id || slugify(f.title) || `pm_${Date.now()}`;
     const features = featuresText.split('\n').map(s => s.trim()).filter(Boolean);
-    const gallery = galleryText.split('\n').map(line => {
-      const [src = '', alt = ''] = line.split('|').map(part => part.trim());
-      return { src, alt: alt || f.title };
-    }).filter(image => image.src);
+    const cleanGallery = gallery
+      .map(image => ({ src: image.src.trim(), alt: image.alt.trim() || f.title }))
+      .filter(image => image.src);
     const videos = videoText.split('\n').map(line => {
       const [src = '', poster = '', title = '', description = '', aspect = 'wide'] = line.split('|').map(part => part.trim());
       return {
@@ -225,7 +235,7 @@ function PreMadeForm({ initial, onSave, onClose }: { initial: PreMadeItem | null
       ...f,
       id,
       alt: f.alt || f.title,
-      gallery,
+      gallery: cleanGallery,
       features,
       videos: videos.length ? videos : undefined,
       video: primaryVideo.src && primaryVideo.poster ? primaryVideo : undefined,
@@ -271,8 +281,61 @@ function PreMadeForm({ initial, onSave, onClose }: { initial: PreMadeItem | null
         <input value={f.paymentUrl ?? ''} onChange={e => set('paymentUrl', e.target.value)} placeholder="https://connect.intuit.com/pay/..." className={inputCls()} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
       </div>
       <div>
-        <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Gallery Images <span className="text-white/25 normal-case font-sans tracking-normal">one per line: image | alt text</span></label>
-        <textarea rows={4} value={galleryText} onChange={e => setGalleryText(e.target.value)} placeholder={"/images/example.jpg | Finished fire pit at sunset\n/images/detail.jpg | Close detail"} className={inputCls('resize-none')} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <label className="block text-xs font-display tracking-widest uppercase text-white/40">Gallery Images</label>
+          <button
+            type="button"
+            onClick={() => setGallery(items => [...items, { src: '', alt: f.title || 'Pre-made product photo' }])}
+            className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-display uppercase tracking-widest text-orange-300/80 transition-colors hover:text-orange-300"
+            style={{ background: 'rgba(255,140,26,0.08)', border: '1px solid rgba(255,140,26,0.18)' }}
+          >
+            <Plus size={12} /> Add Photo
+          </button>
+        </div>
+        <div className="space-y-3">
+          {gallery.length === 0 ? (
+            <div className="rounded-xl px-4 py-8 text-center text-sm text-white/30" style={{ border: '1px dashed rgba(255,255,255,0.12)' }}>
+              No gallery photos yet.
+            </div>
+          ) : (
+            gallery.map((image, index) => (
+              <div key={`${image.src}-${index}`} className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="grid grid-cols-1 md:grid-cols-[7rem_1fr_auto] gap-3">
+                  <div className="aspect-[4/3] overflow-hidden rounded-lg bg-white/[0.04] border border-white/10">
+                    {image.src ? (
+                      <img src={image.src} alt={image.alt || f.title || 'Gallery preview'} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-[11px] text-white/25">Preview</div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <ImageField value={image.src} onChange={src => setGalleryItem(index, { src })} />
+                    <input
+                      value={image.alt}
+                      onChange={e => setGalleryItem(index, { alt: e.target.value })}
+                      placeholder="Alt text for this gallery photo"
+                      className={inputCls()}
+                      style={iStyle}
+                      onFocus={iFocus}
+                      onBlur={iBlur}
+                    />
+                  </div>
+                  <div className="flex md:flex-col gap-2">
+                    <button type="button" onClick={() => moveGalleryItem(index, -1)} disabled={index === 0} className="rounded-lg p-2 text-white/40 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-25" style={iStyle} aria-label="Move photo up">
+                      <ChevronUp size={15} />
+                    </button>
+                    <button type="button" onClick={() => moveGalleryItem(index, 1)} disabled={index === gallery.length - 1} className="rounded-lg p-2 text-white/40 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-25" style={iStyle} aria-label="Move photo down">
+                      <ChevronDown size={15} />
+                    </button>
+                    <button type="button" onClick={() => setGallery(items => items.filter((_, i) => i !== index))} className="rounded-lg p-2 text-white/30 transition-colors hover:text-red-400" style={iStyle} aria-label="Remove photo">
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
       <div>
         <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Features <span className="text-white/25 normal-case font-sans tracking-normal">one per line</span></label>

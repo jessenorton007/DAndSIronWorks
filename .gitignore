@@ -51,3 +51,4 @@ Thumbs.db
 # local runtime artifacts
 /work/
 /artifacts/commerce-data.json
+/artifacts/ironworks/vite-*.log
