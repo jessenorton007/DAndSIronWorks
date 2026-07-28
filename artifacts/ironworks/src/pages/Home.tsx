@@ -955,6 +955,20 @@ export function Home() {
               Etsy Shop →
             </a>
           </div>
+          <div className="mt-8 rounded-full border border-orange-500/20 bg-orange-500/5 px-5 py-3 text-center shadow-[0_0_30px_rgba(234,88,12,0.08)]">
+            <p className="text-xs font-sans tracking-wide text-white/45">
+              Proudly designed by <span className="text-orange-300/80">Mojave Marketing</span> in partnership with{' '}
+              <a
+                href="https://surrealmarketingservices.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-orange-300/80 underline decoration-orange-400/35 underline-offset-4 transition-colors hover:text-orange-200"
+              >
+                Surreal Marketing
+              </a>
+              .
+            </p>
+          </div>
         </div>
       </footer>
 
