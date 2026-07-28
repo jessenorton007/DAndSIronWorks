@@ -6,6 +6,7 @@ export type ServicePage = {
   metaDescription: string;
   eyebrow: string;
   heroImage: string;
+  gallery?: { src: string; alt: string }[];
   summary: string;
   details: string[];
   examples: string[];
@@ -26,7 +27,7 @@ export const services: ServicePage[] = [
       'Hand-forged and plasma-cut steel details',
       'Custom work for indoor, outdoor, decorative, and functional pieces',
     ],
-    examples: ['Fire pits', 'Forged railings', 'Custom signs', 'Tables and furniture', 'Metal wall art'],
+    examples: ['Fire pits', 'Forged railings', 'Custom knives', 'Custom signs', 'Tables and furniture', 'Metal wall art'],
   },
   {
     slug: 'custom-fire-pits',
@@ -51,7 +52,33 @@ export const services: ServicePage[] = [
     metaTitle: 'Forged Railings | Custom Metal Stair and Hand Railings',
     metaDescription: 'Custom forged railings, stair rails, balcony guards, and handrails by D&S Iron Works with hand-shaped metal details.',
     eyebrow: 'Architectural Iron',
-    heroImage: '/images/portfolio-railing.png',
+    heroImage: '/images/client-upload-railings/railing-install-main.jpg',
+    gallery: [
+      {
+        src: '/images/client-upload-railings/railing-stair-install.jpg',
+        alt: 'Finished hand-forged stair railing installed beside a wood staircase',
+      },
+      {
+        src: '/images/client-upload-railings/railing-install-main.jpg',
+        alt: 'Custom hand-forged stair and balcony railing installed in a home',
+      },
+      {
+        src: '/images/client-upload-railings/railing-balcony-install.jpg',
+        alt: 'Installed forged balcony railing with organic steel balusters',
+      },
+      {
+        src: '/images/client-upload-railings/railing-stair-finished.jpg',
+        alt: 'Finished interior stair railing with hand-forged steel detail',
+      },
+      {
+        src: '/images/client-upload-railings/railing-shop-progress.jpg',
+        alt: 'Custom forged railing section in the D&S Iron Works shop',
+      },
+      {
+        src: '/images/client-upload-railings/railing-detail.jpg',
+        alt: 'Close detail of forged railing balusters before installation',
+      },
+    ],
     summary: 'Forged railings bring strength and craft into stairways, entries, balconies, and interior spaces.',
     details: [
       'Custom railing layouts for interior and exterior projects',
@@ -59,6 +86,22 @@ export const services: ServicePage[] = [
       'Designed for long-term use and a strong visual presence',
     ],
     examples: ['Stair railings', 'Balcony guards', 'Interior handrails', 'Entry railings'],
+  },
+  {
+    slug: 'hand-forged-knives',
+    title: 'Hand-Forged Knives',
+    shortTitle: 'Knives',
+    metaTitle: 'Hand-Forged Knives | Custom Forged Blades by D&S Iron Works',
+    metaDescription: 'Hand-forged knives and custom blade commissions by D&S Iron Works, including forged steel details, functional builds, and display pieces.',
+    eyebrow: 'Forged Blades',
+    heroImage: '/images/hammering-maple-leaf-poster.jpg',
+    summary: 'Hand-forged knives are built as custom blade projects with shop-forged steel character, handle planning, and a direct conversation about the intended use or display.',
+    details: [
+      'Custom knife and blade concepts planned with Dallan',
+      'Forged steel work with handmade finish and character',
+      'Options for functional outdoor use, gifts, or display pieces',
+    ],
+    examples: ['Custom knives', 'Camp knives', 'Display blades', 'Forged gifts'],
   },
   {
     slug: 'custom-metal-signs',

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, CheckCircle, Phone } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Phone, X } from 'lucide-react';
 import { useLocation, useParams } from 'wouter';
 import { Navigation } from '@/components/Navigation';
 import { FloatingContactBanner } from '@/components/FloatingContactBanner';
@@ -17,6 +17,14 @@ export function PreMadeDetailPage() {
   const { products } = usePreMadeProducts();
   const item = products.find((product) => product.id === params.id);
   const [purchaseOpen, setPurchaseOpen] = useState(false);
+  const [expandedImage, setExpandedImage] = useState<{ src: string; alt: string } | null>(null);
+
+  useLayoutEffect(() => {
+    const reset = () => window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    reset();
+    const timeouts = [80, 220, 500, 900].map((delay) => window.setTimeout(reset, delay));
+    return () => timeouts.forEach((timeout) => window.clearTimeout(timeout));
+  }, [params.id]);
 
   useSeo({
     title: item ? `${item.title} | D&S Iron Works Pre-Made Steel` : 'Pre-Made Steel Items | D&S Iron Works',
@@ -108,7 +116,14 @@ export function PreMadeDetailPage() {
               className="relative aspect-[4/3] rounded-xl overflow-hidden"
               style={{ border: '1px solid rgba(255,140,26,0.16)', boxShadow: '0 24px 80px rgba(0,0,0,0.45)' }}
             >
-              <img src={item.image} alt={item.alt} className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => setExpandedImage({ src: item.image, alt: item.alt })}
+                className="h-full w-full cursor-zoom-in"
+                aria-label={`Enlarge ${item.title} photo`}
+              >
+                <img src={item.image} alt={item.alt} className="w-full h-full object-cover" />
+              </button>
               <div className="absolute inset-0 bg-gradient-to-t from-black/52 via-transparent to-transparent pointer-events-none" />
             </motion.div>
           </div>
@@ -143,9 +158,16 @@ export function PreMadeDetailPage() {
               </h2>
               <div className="grid grid-cols-2 gap-3">
                 {item.gallery.map((image) => (
-                  <div key={image.src} className="aspect-[4/3] rounded-lg overflow-hidden bg-black/50" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <button
+                    key={image.src}
+                    type="button"
+                    onClick={() => setExpandedImage(image)}
+                    className="aspect-[4/3] rounded-lg overflow-hidden bg-black/50 cursor-zoom-in"
+                    style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+                    aria-label={`Enlarge ${image.alt}`}
+                  >
                     <img src={image.src} alt={image.alt} className="w-full h-full object-cover" />
-                  </div>
+                  </button>
                 ))}
               </div>
             </section>
@@ -196,6 +218,32 @@ export function PreMadeDetailPage() {
         isOpen={purchaseOpen}
         onClose={() => setPurchaseOpen(false)}
       />
+
+      {expandedImage && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/88 px-4 py-6 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label={expandedImage.alt}
+          onClick={() => setExpandedImage(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setExpandedImage(null)}
+            className="absolute right-4 top-4 rounded-full border border-white/15 bg-black/55 p-3 text-white/70 transition-colors hover:text-white"
+            aria-label="Close enlarged image"
+          >
+            <X size={20} />
+          </button>
+          <img
+            src={expandedImage.src}
+            alt={expandedImage.alt}
+            className="max-h-[88vh] max-w-[94vw] rounded-xl object-contain"
+            style={{ boxShadow: '0 28px 90px rgba(0,0,0,0.7)' }}
+            onClick={(event) => event.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

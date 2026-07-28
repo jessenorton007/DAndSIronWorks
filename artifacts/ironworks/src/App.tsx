@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { useEffect, useLayoutEffect } from "react";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +15,29 @@ import { AdminGear } from "@/components/AdminGear";
 import { init as initTracker } from "@/analytics/tracker";
 
 const queryClient = new QueryClient();
+
+function ScrollToRouteTop() {
+  const [location] = useLocation();
+
+  useLayoutEffect(() => {
+    const scrollToTarget = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) {
+        document.getElementById(hash)?.scrollIntoView({ block: 'start' });
+        return;
+      }
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    };
+
+    scrollToTarget();
+    window.requestAnimationFrame(scrollToTarget);
+    const timeouts = [80, 220, 500, 900].map((delay) => window.setTimeout(scrollToTarget, delay));
+
+    return () => timeouts.forEach((timeout) => window.clearTimeout(timeout));
+  }, [location]);
+
+  return null;
+}
 
 function Router() {
   return (
@@ -41,6 +64,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <ScrollToRouteTop />
           <Router />
           <AdminGear />
         </WouterRouter>

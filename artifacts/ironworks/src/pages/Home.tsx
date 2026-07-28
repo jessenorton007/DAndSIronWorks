@@ -535,7 +535,7 @@ export function Home() {
                 desc: 'Tree of life sculptures, candelabras, hooks, bells, and one-of-a-kind decorative ironwork',
               },
               {
-                src: '/images/portfolio-railing.png',
+                src: '/images/client-upload-railings/railing-install-main.jpg',
                 label: 'Forged Railings',
                 alt: 'Hand-forged stair railing example',
                 desc: 'Stair railings, balcony guards, and interior handrails — all hand-forged',

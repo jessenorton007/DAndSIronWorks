@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle, Phone } from 'lucide-react';
+import { useLayoutEffect } from 'react';
 import { useLocation, useParams } from 'wouter';
 import { Navigation } from '@/components/Navigation';
 import { FloatingContactBanner } from '@/components/FloatingContactBanner';
@@ -13,6 +14,13 @@ export function ServiceDetailPage() {
   const params = useParams<{ slug: string }>();
   const [, navigate] = useLocation();
   const service = getService(params.slug);
+
+  useLayoutEffect(() => {
+    const reset = () => window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    reset();
+    const timeouts = [80, 220, 500, 900].map((delay) => window.setTimeout(reset, delay));
+    return () => timeouts.forEach((timeout) => window.clearTimeout(timeout));
+  }, [params.slug]);
 
   useSeo({
     title: service?.metaTitle ?? 'Custom Ironwork Services | D&S Iron Works',
@@ -127,6 +135,35 @@ export function ServiceDetailPage() {
               </div>
             </section>
           </div>
+
+          {service.gallery && service.gallery.length > 0 && (
+            <section className="mt-10">
+              <div className="mb-6">
+                <h2 className="font-display text-2xl sm:text-3xl uppercase tracking-widest text-white mb-2">
+                  Real Project Photos
+                </h2>
+                <p className="text-white/45 text-sm font-sans leading-relaxed max-w-2xl">
+                  Finished installation and shop-progress views from D&S Iron Works railing projects.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {service.gallery.map((image) => (
+                  <div
+                    key={image.src}
+                    className="aspect-[4/3] overflow-hidden rounded-xl bg-black/50"
+                    style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+                  >
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                      loading="lazy"
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </main>
     </div>
