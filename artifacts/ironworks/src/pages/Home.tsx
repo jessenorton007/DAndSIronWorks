@@ -988,19 +988,58 @@ export function Home() {
               Etsy Shop →
             </a>
           </div>
-          <div className="mt-8 rounded-full border border-orange-500/20 bg-orange-500/5 px-5 py-3 text-center shadow-[0_0_30px_rgba(234,88,12,0.08)]">
-            <p className="text-xs font-sans tracking-wide text-white/45">
-              Proudly designed by <span className="text-orange-300/80">Mojave Marketing</span> in partnership with{' '}
-              <a
-                href="https://surrealmarketingservices.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-orange-300/80 underline decoration-orange-400/35 underline-offset-4 transition-colors hover:text-orange-200"
+          {/* Agency credit — floating pill */}
+          <div className="mt-10 flex justify-center">
+            <div className="relative">
+              {/* Ambient glow layer behind the pill */}
+              <div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                style={{
+                  background: 'radial-gradient(ellipse at center, rgba(255,100,20,0.13) 0%, transparent 72%)',
+                  transform: 'scaleX(1.6) scaleY(2.2)',
+                  filter: 'blur(18px)',
+                }}
+              />
+              <div
+                className="relative flex items-center gap-2 px-6 py-2.5 rounded-full text-center"
+                style={{
+                  background: 'rgba(18,12,8,0.70)',
+                  backdropFilter: 'blur(24px)',
+                  WebkitBackdropFilter: 'blur(24px)',
+                  border: '1px solid rgba(255,120,30,0.18)',
+                  boxShadow: '0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 40px rgba(255,70,0,0.10), 0 1px 0 rgba(255,255,255,0.06) inset',
+                }}
               >
-                Surreal Marketing
-              </a>
-              .
-            </p>
+                {/* Inner top highlight */}
+                <div
+                  className="absolute top-0 left-1/4 right-1/4 h-px rounded-full pointer-events-none"
+                  style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)' }}
+                />
+                {/* Subtle inner warm glow */}
+                <div
+                  className="absolute inset-0 rounded-full pointer-events-none"
+                  style={{ background: 'radial-gradient(ellipse at 40% 0%, rgba(255,90,0,0.07) 0%, transparent 60%)' }}
+                />
+                <span
+                  className="relative text-[11px] font-sans tracking-wide whitespace-nowrap"
+                  style={{ color: 'rgba(255,255,255,0.32)', letterSpacing: '0.04em' }}
+                >
+                  Proudly designed by{' '}
+                  <span style={{ color: 'rgba(255,175,100,0.75)' }}>Mojave Marketing</span>
+                  {' '}in partnership with{' '}
+                  <a
+                    href="https://surrealmarketingservices.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: 'rgba(255,175,100,0.75)', textDecoration: 'underline', textDecorationColor: 'rgba(255,140,50,0.30)', textUnderlineOffset: '3px', transition: 'color 0.2s' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,210,150,0.95)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,175,100,0.75)')}
+                  >
+                    Surreal Marketing
+                  </a>
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
