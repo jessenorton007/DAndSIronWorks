@@ -1,26 +1,26 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft, CheckCircle, Phone } from 'lucide-react';
-import { useLayoutEffect } from 'react';
+import { ArrowLeft, CheckCircle, Phone, PocketKnife } from 'lucide-react';
 import { useLocation, useParams } from 'wouter';
 import { Navigation } from '@/components/Navigation';
 import { FloatingContactBanner } from '@/components/FloatingContactBanner';
 import { Embers } from '@/components/Embers';
 import { GlassButton } from '@/components/GlassButton';
-import { getService } from '@/data/services';
+import { useAdminServices } from '@/hooks/useAdminProducts';
 import { useSeo } from '@/lib/seo';
 import NotFound from './not-found';
 
 export function ServiceDetailPage() {
   const params = useParams<{ slug: string }>();
   const [, navigate] = useLocation();
-  const service = getService(params.slug);
-
-  useLayoutEffect(() => {
-    const reset = () => window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    reset();
-    const timeouts = [80, 220, 500, 900].map((delay) => window.setTimeout(reset, delay));
-    return () => timeouts.forEach((timeout) => window.clearTimeout(timeout));
-  }, [params.slug]);
+  const { services } = useAdminServices();
+  const service = services.find((item) => item.slug === params.slug);
+  const returnToServices = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    navigate('/services');
+  };
 
   useSeo({
     title: service?.metaTitle ?? 'Custom Ironwork Services | D&S Iron Works',
@@ -57,7 +57,7 @@ export function ServiceDetailPage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,77,0,0.06)_0%,transparent_62%)] pointer-events-none" />
         <div className="container mx-auto px-5 sm:px-6 md:px-12 relative z-10">
           <button
-            onClick={() => navigate('/services')}
+            onClick={returnToServices}
             className="flex items-center gap-2 text-white/35 hover:text-white transition-colors mb-10 group font-display tracking-wider text-sm uppercase"
           >
             <ArrowLeft size={15} className="group-hover:-translate-x-1 transition-transform" />
@@ -93,7 +93,16 @@ export function ServiceDetailPage() {
               className="relative aspect-[4/3] rounded-xl overflow-hidden"
               style={{ border: '1px solid rgba(255,140,26,0.16)', boxShadow: '0 24px 80px rgba(0,0,0,0.45)' }}
             >
-              <img src={service.heroImage} alt={`${service.title} example from D&S Iron Works`} className="w-full h-full object-cover" />
+              {service.heroImage ? (
+                <img src={service.heroImage} alt={`${service.title} example from D&S Iron Works`} className="w-full h-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full flex-col items-center justify-center gap-5 bg-[linear-gradient(135deg,rgba(255,140,26,0.18),rgba(255,255,255,0.035)_45%,rgba(0,0,0,0.45))]">
+                  <PocketKnife size={56} className="text-orange-300/70" strokeWidth={1.35} />
+                  <span className="font-display text-base uppercase tracking-[0.3em] text-white/55">
+                    Custom Blade Commissions
+                  </span>
+                </div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
             </motion.div>
           </div>

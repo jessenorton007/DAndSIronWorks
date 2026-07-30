@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useLocation } from "wouter";
+import { PocketKnife } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { Embers } from "@/components/Embers";
 import { GlassButton } from "@/components/GlassButton";
@@ -8,9 +9,8 @@ import { CheckoutModal } from "@/components/CheckoutModal";
 import { PreMadePurchaseModal } from "@/components/PreMadePurchaseModal";
 import { FloatingContactBanner } from "@/components/FloatingContactBanner";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { useEtsyProducts, usePremiumProducts, usePreMadeProducts } from "@/hooks/useAdminProducts";
+import { useAdminServices, useEtsyProducts, usePremiumProducts, usePreMadeProducts } from "@/hooks/useAdminProducts";
 import { PremiumProduct } from "@/data/premium-products";
-import { services } from "@/data/services";
 import { PreMadeItem } from "@/data/premade-items";
 import { useSeo } from "@/lib/seo";
 
@@ -330,6 +330,54 @@ export function Home() {
   const { products: etsyProducts } = useEtsyProducts();
   const { products: premiumProducts } = usePremiumProducts();
   const { products: preMadeProducts } = usePreMadeProducts();
+  const { services: adminServices } = useAdminServices();
+
+  const serviceBySlug = (slug: string) => adminServices.find((service) => service.slug === slug);
+  const customDesignCards = [
+    {
+      fallbackSrc: '/images/custom-sign-bealer.jpg',
+      label: 'Custom Signs & Art',
+      alt: 'Custom metal sign by D&S Iron Works',
+      desc: 'Personalized metal signs, address plaques, and custom cut artwork for home and ranch',
+      slug: 'custom-metal-signs',
+    },
+    {
+      fallbackSrc: '/images/tree-of-life.jpg',
+      label: 'Forged Art & Décor',
+      alt: 'Tree of Life forged iron sculpture',
+      desc: 'Tree of life sculptures, candelabras, hooks, bells, and one-of-a-kind decorative ironwork',
+      slug: 'forged-metal-art',
+    },
+    {
+      fallbackSrc: '/images/client-upload-railings/railing-install-main.jpg',
+      label: 'Forged Railings',
+      alt: 'Hand-forged stair railing example',
+      desc: 'Stair railings, balcony guards, and interior handrails — all hand-forged',
+      slug: 'forged-railings',
+    },
+    {
+      fallbackSrc: '/images/fire-pit-real.jpg',
+      label: 'Fire Pits',
+      alt: 'Custom fire pit with metal cutout design',
+      desc: 'Outdoor fire pits with custom cutout designs — CNC plasma or hand-forged',
+      slug: 'custom-fire-pits',
+    },
+    {
+      fallbackSrc: '',
+      label: 'Hand-Forged Knives',
+      alt: 'Hand-forged knives by D&S Iron Works',
+      desc: 'Custom knife and blade commissions planned directly with Dallan',
+      slug: 'hand-forged-knives',
+    },
+  ].map((card) => {
+    const service = serviceBySlug(card.slug);
+    return {
+      ...card,
+      src: service?.heroImage ?? card.fallbackSrc,
+      label: service?.shortTitle ?? card.label,
+      desc: service?.summary ?? card.desc,
+    };
+  });
 
   useSeo({
     title: 'D&S Iron Works | Custom Ironwork, Fire Pits & Iron Rocket Stoves in Utah',
@@ -521,46 +569,31 @@ export function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 mb-16">
-            {[
-              {
-                src: '/images/custom-sign-bealer.jpg',
-                label: 'Custom Signs & Art',
-                alt: 'Custom metal sign by D&S Iron Works',
-                desc: 'Personalized metal signs, address plaques, and custom cut artwork for home and ranch',
-              },
-              {
-                src: '/images/tree-of-life.jpg',
-                label: 'Forged Art & Décor',
-                alt: 'Tree of Life forged iron sculpture',
-                desc: 'Tree of life sculptures, candelabras, hooks, bells, and one-of-a-kind decorative ironwork',
-              },
-              {
-                src: '/images/client-upload-railings/railing-install-main.jpg',
-                label: 'Forged Railings',
-                alt: 'Hand-forged stair railing example',
-                desc: 'Stair railings, balcony guards, and interior handrails — all hand-forged',
-              },
-              {
-                src: '/images/fire-pit-real.jpg',
-                label: 'Fire Pits',
-                alt: 'Custom fire pit with metal cutout design',
-                desc: 'Outdoor fire pits with custom cutout designs — CNC plasma or hand-forged',
-              },
-            ].map((item, i) => (
-              <motion.div
+            {customDesignCards.map((item, i) => (
+              <motion.button
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-80px' }}
                 transition={{ delay: i * 0.1 }}
-                className="group relative aspect-[4/3] overflow-hidden rounded-xl"
+                onClick={() => navigate(`/services/${item.slug}`)}
+                className="group relative aspect-[4/3] overflow-hidden rounded-xl text-left"
                 style={{ border: '1px solid rgba(255,255,255,0.09)' }}
               >
-                <img
-                  src={item.src}
-                  alt={item.alt}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
+                {item.src ? (
+                  <img
+                    src={item.src}
+                    alt={item.alt}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-[linear-gradient(135deg,rgba(255,140,26,0.18),rgba(255,255,255,0.035)_45%,rgba(0,0,0,0.45))]">
+                    <PocketKnife size={42} className="text-orange-300/70" strokeWidth={1.4} />
+                    <span className="font-display text-sm uppercase tracking-[0.28em] text-white/55">
+                      Custom Blade Commissions
+                    </span>
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
                   <h3 className="font-display text-lg sm:text-xl uppercase tracking-wider text-white mb-1">{item.label}</h3>
@@ -568,7 +601,7 @@ export function Home() {
                 </div>
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                   style={{ boxShadow: 'inset 0 0 0 1px rgba(255,140,26,0.25)' }} />
-              </motion.div>
+              </motion.button>
             ))}
           </div>
 
@@ -587,7 +620,7 @@ export function Home() {
               </GlassButton>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {services.map((service) => (
+              {adminServices.map((service) => (
                 <button
                   key={service.slug}
                   onClick={() => navigate(`/services/${service.slug}`)}

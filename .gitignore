@@ -53,3 +53,7 @@ Thumbs.db
 /artifacts/commerce-data.json
 /artifacts/ironworks/vite-*.log
 /artifacts/ironworks/public/images/client-upload-railings/img_*.jpeg
+
+# local secrets
+.env
+.env.*

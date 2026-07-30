@@ -15,13 +15,41 @@ import { AdminGear } from "@/components/AdminGear";
 import { init as initTracker } from "@/analytics/tracker";
 
 const queryClient = new QueryClient();
+const scrollPositions = new Map<string, number>();
+let navigationWasPop = false;
+
+function routeScrollKey() {
+  return `${window.location.pathname}${window.location.search}`;
+}
 
 function ScrollToRouteTop() {
   const [location] = useLocation();
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    window.history.scrollRestoration = 'manual';
+    const handlePopState = () => {
+      navigationWasPop = true;
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   useLayoutEffect(() => {
+    const previousKey = routeScrollKey();
+
     const scrollToTarget = () => {
+      const key = routeScrollKey();
       const hash = window.location.hash.replace('#', '');
+      if (navigationWasPop) {
+        const savedY = scrollPositions.get(key);
+        if (typeof savedY === 'number') {
+          window.scrollTo({ top: savedY, left: 0, behavior: 'auto' });
+          return;
+        }
+      }
       if (hash) {
         document.getElementById(hash)?.scrollIntoView({ block: 'start' });
         return;
@@ -33,7 +61,12 @@ function ScrollToRouteTop() {
     window.requestAnimationFrame(scrollToTarget);
     const timeouts = [80, 220, 500, 900].map((delay) => window.setTimeout(scrollToTarget, delay));
 
-    return () => timeouts.forEach((timeout) => window.clearTimeout(timeout));
+    navigationWasPop = false;
+
+    return () => {
+      scrollPositions.set(previousKey, window.scrollY);
+      timeouts.forEach((timeout) => window.clearTimeout(timeout));
+    };
   }, [location]);
 
   return null;

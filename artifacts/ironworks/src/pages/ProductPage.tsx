@@ -12,6 +12,13 @@ export function ProductPage() {
   const [, navigate] = useLocation();
   const { products } = useEtsyProducts();
   const product = products.find(p => p.id === params.id);
+  const returnToShop = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    navigate('/#shop');
+  };
 
   useSeo({
     title: product ? `${product.title} | D&S Iron Works` : 'Hand-Forged Products | D&S Iron Works',
@@ -44,7 +51,7 @@ export function ProductPage() {
       <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
         <div className="text-center">
           <p className="font-display text-4xl tracking-widest text-white/30 mb-6">Product not found</p>
-          <GlassButton onClick={() => navigate('/')}>Back to Shop</GlassButton>
+          <GlassButton onClick={() => navigate('/#shop')}>Back to Shop</GlassButton>
         </div>
       </div>
     );
@@ -60,7 +67,7 @@ export function ProductPage() {
           <motion.button
             initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
-            onClick={() => navigate('/')}
+            onClick={returnToShop}
             className="flex items-center gap-2 text-white/40 hover:text-white transition-colors mb-10 group font-display tracking-wider text-sm uppercase"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />

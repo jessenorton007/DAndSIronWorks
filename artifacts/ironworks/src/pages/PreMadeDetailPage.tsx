@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle, Phone, X } from 'lucide-react';
 import { useLocation, useParams } from 'wouter';
@@ -18,13 +18,9 @@ export function PreMadeDetailPage() {
   const item = products.find((product) => product.id === params.id);
   const [purchaseOpen, setPurchaseOpen] = useState(false);
   const [expandedImage, setExpandedImage] = useState<{ src: string; alt: string } | null>(null);
-
-  useLayoutEffect(() => {
-    const reset = () => window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    reset();
-    const timeouts = [80, 220, 500, 900].map((delay) => window.setTimeout(reset, delay));
-    return () => timeouts.forEach((timeout) => window.clearTimeout(timeout));
-  }, [params.id]);
+  const returnToPreMade = () => {
+    window.location.assign('/#pre-made');
+  };
 
   useSeo({
     title: item ? `${item.title} | D&S Iron Works Pre-Made Steel` : 'Pre-Made Steel Items | D&S Iron Works',
@@ -66,7 +62,7 @@ export function PreMadeDetailPage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,77,0,0.06)_0%,transparent_62%)] pointer-events-none" />
         <div className="container mx-auto px-5 sm:px-6 md:px-12 relative z-10">
           <button
-            onClick={() => navigate('/#pre-made')}
+            onClick={returnToPreMade}
             className="flex items-center gap-2 text-white/35 hover:text-white transition-colors mb-10 group font-display tracking-wider text-sm uppercase"
           >
             <ArrowLeft size={15} className="group-hover:-translate-x-1 transition-transform" />

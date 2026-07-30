@@ -2,10 +2,12 @@ import { useState, useCallback } from 'react';
 import { EtsyProduct, defaultEtsyProducts } from '@/data/etsy-products';
 import { PremiumProduct, defaultPremiumProducts } from '@/data/premium-products';
 import { PreMadeItem, preMadeItems as defaultPreMadeItems } from '@/data/premade-items';
+import { ServicePage, services as defaultServices } from '@/data/services';
 
-const ETSY_KEY = 'ds_etsy_products_v2';
+const ETSY_KEY = 'ds_etsy_products_v5';
 const PREMIUM_KEY = 'ds_premium_products_v2';
 const PREMADE_KEY = 'ds_premade_products_v1';
+const SERVICES_KEY = 'ds_services_v1';
 const ORDERS_KEY = 'ds_orders';
 const INQUIRIES_KEY = 'ds_inquiries';
 
@@ -40,9 +42,32 @@ function readStorage<T>(key: string, fallback: T): T {
   }
 }
 
+function readEtsyProducts() {
+  const current = readStorage<EtsyProduct[] | null>(ETSY_KEY, null);
+  if (current) return current;
+
+  localStorage.setItem(ETSY_KEY, JSON.stringify(defaultEtsyProducts));
+  return defaultEtsyProducts;
+}
+
+function mergeServices(stored: ServicePage[]) {
+  const storedBySlug = new Map(stored.map(service => [service.slug, service]));
+  return defaultServices.map(service => ({
+    ...service,
+    ...(storedBySlug.get(service.slug) ?? {}),
+  }));
+}
+
+function readServices() {
+  const current = readStorage<ServicePage[] | null>(SERVICES_KEY, null);
+  const merged = mergeServices(current ?? defaultServices);
+  if (!current) localStorage.setItem(SERVICES_KEY, JSON.stringify(merged));
+  return merged;
+}
+
 export function useEtsyProducts() {
   const [products, setProductsState] = useState<EtsyProduct[]>(() =>
-    readStorage<EtsyProduct[]>(ETSY_KEY, defaultEtsyProducts)
+    readEtsyProducts()
   );
 
   const setProducts = useCallback((updated: EtsyProduct[]) => {
@@ -51,16 +76,16 @@ export function useEtsyProducts() {
   }, []);
 
   const addProduct = useCallback((p: EtsyProduct) => {
-    setProducts([...readStorage<EtsyProduct[]>(ETSY_KEY, defaultEtsyProducts), p]);
+    setProducts([...readEtsyProducts(), p]);
   }, [setProducts]);
 
   const updateProduct = useCallback((p: EtsyProduct) => {
-    const all = readStorage<EtsyProduct[]>(ETSY_KEY, defaultEtsyProducts);
+    const all = readEtsyProducts();
     setProducts(all.map(x => x.id === p.id ? p : x));
   }, [setProducts]);
 
   const removeProduct = useCallback((id: string) => {
-    const all = readStorage<EtsyProduct[]>(ETSY_KEY, defaultEtsyProducts);
+    const all = readEtsyProducts();
     setProducts(all.filter(x => x.id !== id));
   }, [setProducts]);
 
@@ -119,6 +144,25 @@ export function usePreMadeProducts() {
   }, [setProducts]);
 
   return { products, setProducts, addProduct, updateProduct, removeProduct };
+}
+
+export function useAdminServices() {
+  const [services, setServicesState] = useState<ServicePage[]>(() =>
+    readServices()
+  );
+
+  const setServices = useCallback((updated: ServicePage[]) => {
+    const merged = mergeServices(updated);
+    setServicesState(merged);
+    localStorage.setItem(SERVICES_KEY, JSON.stringify(merged));
+  }, []);
+
+  const updateService = useCallback((service: ServicePage) => {
+    const all = readServices();
+    setServices(all.map(item => item.slug === service.slug ? service : item));
+  }, [setServices]);
+
+  return { services, setServices, updateService };
 }
 
 export function saveOrder(order: Omit<Order, 'id' | 'submittedAt'>) {

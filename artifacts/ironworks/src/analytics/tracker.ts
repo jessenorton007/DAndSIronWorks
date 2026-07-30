@@ -72,6 +72,8 @@ function getDeviceInfo() {
 
 const VID_KEY = 'ds_avid';
 const SID_KEY = 'ds_asid';
+const LOCAL_EVENTS_KEY = 'ds_local_analytics_events_v1';
+const LOCAL_EVENT_LIMIT = 3000;
 
 function getOrCreate(storage: Storage, key: string, prefix: string): string {
   let v = storage.getItem(key);
@@ -114,9 +116,20 @@ function push(type: EvType, data: Record<string, unknown> = {}) {
   _queue.push({ type, sessionId: _sid, visitorId: _vid, page: _page, ts: Date.now(), data });
 }
 
+function storeLocalEvents(events: TEvent[]) {
+  try {
+    const current = JSON.parse(localStorage.getItem(LOCAL_EVENTS_KEY) || '[]') as TEvent[];
+    const updated = [...current, ...events].slice(-LOCAL_EVENT_LIMIT);
+    localStorage.setItem(LOCAL_EVENTS_KEY, JSON.stringify(updated));
+  } catch {
+    /* Local analytics should never interrupt the site. */
+  }
+}
+
 async function flush(keepalive = false) {
   if (_queue.length === 0) return;
   const batch = _queue.splice(0, _queue.length);
+  storeLocalEvents(batch);
   try {
     await fetch('/api/analytics/event', {
       method: 'POST',

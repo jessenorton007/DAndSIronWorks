@@ -19,8 +19,7 @@ export function Navigation() {
     const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     const isHome = window.location.pathname === '/' || window.location.pathname === base || window.location.pathname === base + '/';
     if (!isHome) {
-      navigate('/');
-      setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 120);
+      navigate(`/#${id}`);
       return;
     }
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -59,7 +58,7 @@ export function Navigation() {
               : '0 4px 24px rgba(0,0,0,0.3)',
           }}
         >
-          <div className="flex-shrink-0 cursor-pointer" onClick={() => navigate('/')}>
+          <div className="flex-shrink-0 cursor-pointer" onClick={() => navigate('/#hero')}>
             <img
               src="/brand/logo.png"
               alt="D&S Iron Works"

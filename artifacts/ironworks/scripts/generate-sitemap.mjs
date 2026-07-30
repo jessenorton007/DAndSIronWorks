@@ -1,4 +1,4 @@
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const siteArg = process.argv.find((arg) => arg.startsWith('--site='));
@@ -9,6 +9,10 @@ if (!rawSiteUrl) {
 }
 
 const siteUrl = rawSiteUrl.replace(/\/$/, '');
+
+const productData = readFileSync(resolve('src', 'data', 'etsy-products.ts'), 'utf8');
+const etsyProductRoutes = [...productData.matchAll(/id: '([^']+)'/g)]
+  .map((match) => `/shop/${match[1]}`);
 
 const routes = [
   '/',
@@ -24,19 +28,7 @@ const routes = [
   '/pre-made/iron-rocket-stove',
   '/pre-made/iron-rocket-xl',
   '/contact',
-  '/shop/spiral-pendant-tree',
-  '/shop/copper-nail-earrings',
-  '/shop/horse-hoof-pick',
-  '/shop/copper-heart-earrings',
-  '/shop/eagle-pendant',
-  '/shop/dinner-bell',
-  '/shop/cross-copper-wire',
-  '/shop/horseshoe-heart-pendant',
-  '/shop/spiral-pendant-drift',
-  '/shop/large-celtic-cross',
-  '/shop/rustic-copper-cross',
-  '/shop/leaf-pendant',
-  '/shop/iron-heart-pendant',
+  ...etsyProductRoutes,
 ];
 
 const today = new Date().toISOString().slice(0, 10);

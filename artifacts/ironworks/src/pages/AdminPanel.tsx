@@ -4,21 +4,22 @@ import { useLocation } from 'wouter';
 import {
   LayoutDashboard, ShoppingBag, Gem, MessageSquare,
   ClipboardList, Settings, LogOut, Plus, Pencil,
-  Trash2, X, Upload, ExternalLink, ChevronDown, ChevronUp, Check, BarChart2, Flame
+  Trash2, X, Upload, ExternalLink, ChevronDown, ChevronUp, Check, BarChart2, Flame, Image as ImageIcon
 } from 'lucide-react';
 import {
-  useEtsyProducts, usePremiumProducts, usePreMadeProducts,
+  useAdminServices, useEtsyProducts, usePremiumProducts, usePreMadeProducts,
   getOrders, getInquiries, deleteOrder, deleteInquiry,
   Order, Inquiry
 } from '@/hooks/useAdminProducts';
 import { EtsyProduct } from '@/data/etsy-products';
 import { PremiumProduct } from '@/data/premium-products';
 import { PreMadeItem } from '@/data/premade-items';
+import { ServicePage } from '@/data/services';
 import { AnalyticsTab } from './AnalyticsTab';
 
 const SESSION_KEY = 'ds_admin_auth';
 
-type Tab = 'overview' | 'premade' | 'etsy' | 'premium' | 'inquiries' | 'orders' | 'analytics' | 'settings';
+type Tab = 'overview' | 'premade' | 'services' | 'etsy' | 'premium' | 'inquiries' | 'orders' | 'analytics' | 'settings';
 
 const SETTINGS_KEY = 'ds_site_settings';
 interface SiteSettings { phone: string; email: string; facebook: string; }
@@ -435,6 +436,132 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: number; 
   );
 }
 
+function ServiceImagesPanel({
+  services,
+  updateService,
+}: {
+  services: ServicePage[];
+  updateService: (service: ServicePage) => void;
+}) {
+  return (
+    <div>
+      <SectionHeader title="Service Images" sub="Images used on the homepage service cards, services page, and individual service pages" />
+      <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(255,140,26,0.06)', border: '1px solid rgba(255,140,26,0.18)' }}>
+        <p className="text-sm text-orange-100/75 font-sans leading-relaxed">
+          Change any service/category image here. Leave the knives image blank until you have a real knife photo; the site will show the custom blade commission placeholder instead of a broken image.
+        </p>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
+        {services.map((service) => (
+          <div key={service.slug} className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="aspect-[4/3] overflow-hidden bg-white/[0.035]">
+              {service.heroImage ? (
+                <img src={service.heroImage} alt={`${service.title} preview`} className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-white/25">
+                  <ImageIcon size={30} />
+                  <span className="font-display text-xs uppercase tracking-widest">No photo assigned</span>
+                </div>
+              )}
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <p className="font-display uppercase tracking-wider text-white text-sm">{service.title}</p>
+                <p className="text-white/25 text-xs font-sans mt-1">/services/{service.slug}</p>
+              </div>
+              <ImageField
+                value={service.heroImage}
+                onChange={(heroImage) => updateService({ ...service, heroImage })}
+              />
+              <button
+                type="button"
+                onClick={() => updateService({ ...service, heroImage: '' })}
+                className="text-xs font-display uppercase tracking-widest text-white/30 hover:text-red-300 transition-colors"
+              >
+                Clear Image
+              </button>
+              <div className="border-t border-white/10 pt-4">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <p className="text-xs font-display uppercase tracking-widest text-white/40">Detail Gallery</p>
+                  <button
+                    type="button"
+                    onClick={() => updateService({
+                      ...service,
+                      gallery: [...(service.gallery ?? []), { src: '', alt: service.title }],
+                    })}
+                    className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-display uppercase tracking-widest text-orange-300/80 transition-colors hover:text-orange-300"
+                    style={{ background: 'rgba(255,140,26,0.08)', border: '1px solid rgba(255,140,26,0.18)' }}
+                  >
+                    <Plus size={12} /> Add
+                  </button>
+                </div>
+                {(service.gallery ?? []).length === 0 ? (
+                  <div className="rounded-lg px-3 py-5 text-center text-xs text-white/25" style={{ border: '1px dashed rgba(255,255,255,0.12)' }}>
+                    No detail gallery photos.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {(service.gallery ?? []).map((image, index) => {
+                      const gallery = service.gallery ?? [];
+                      const updateGalleryItem = (patch: Partial<NonNullable<ServicePage['gallery']>[number]>) => {
+                        updateService({
+                          ...service,
+                          gallery: gallery.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item),
+                        });
+                      };
+                      const moveGalleryItem = (direction: -1 | 1) => {
+                        const nextIndex = index + direction;
+                        if (nextIndex < 0 || nextIndex >= gallery.length) return;
+                        const updated = [...gallery];
+                        [updated[index], updated[nextIndex]] = [updated[nextIndex], updated[index]];
+                        updateService({ ...service, gallery: updated });
+                      };
+                      return (
+                        <div key={`${image.src}-${index}`} className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                          <div className="grid grid-cols-1 gap-3">
+                            <div className="aspect-[4/3] overflow-hidden rounded-lg bg-white/[0.04] border border-white/10">
+                              {image.src ? (
+                                <img src={image.src} alt={image.alt || service.title} className="h-full w-full object-cover" />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center text-[11px] text-white/25">Preview</div>
+                              )}
+                            </div>
+                            <ImageField value={image.src} onChange={(src) => updateGalleryItem({ src })} />
+                            <input
+                              value={image.alt}
+                              onChange={(e) => updateGalleryItem({ alt: e.target.value })}
+                              placeholder="Alt text for this gallery photo"
+                              className={inputCls()}
+                              style={iStyle}
+                              onFocus={iFocus}
+                              onBlur={iBlur}
+                            />
+                            <div className="flex gap-2">
+                              <button type="button" onClick={() => moveGalleryItem(-1)} disabled={index === 0} className="rounded-lg p-2 text-white/40 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-25" style={iStyle} aria-label="Move gallery photo up">
+                                <ChevronUp size={15} />
+                              </button>
+                              <button type="button" onClick={() => moveGalleryItem(1)} disabled={index === gallery.length - 1} className="rounded-lg p-2 text-white/40 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-25" style={iStyle} aria-label="Move gallery photo down">
+                                <ChevronDown size={15} />
+                              </button>
+                              <button type="button" onClick={() => updateService({ ...service, gallery: gallery.filter((_, itemIndex) => itemIndex !== index) })} className="ml-auto rounded-lg p-2 text-white/30 transition-colors hover:text-red-300" style={iStyle} aria-label="Remove gallery photo">
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Main admin panel ─────────────────────────────────────────────
 export function AdminPanel() {
   const [, navigate] = useLocation();
@@ -444,6 +571,7 @@ export function AdminPanel() {
   const { products: etsyProducts, addProduct: addEtsy, updateProduct: updateEtsy, removeProduct: removeEtsy } = useEtsyProducts();
   const { products: premiumProducts, addProduct: addPremium, updateProduct: updatePremium, removeProduct: removePremium } = usePremiumProducts();
   const { products: preMadeProducts, addProduct: addPreMade, updateProduct: updatePreMade, removeProduct: removePreMade } = usePreMadeProducts();
+  const { services: adminServices, updateService } = useAdminServices();
   const [orders, setOrders] = useState<Order[]>(() => getOrders());
   const [inquiries, setInquiries] = useState<Inquiry[]>(() => getInquiries());
 
@@ -480,6 +608,7 @@ export function AdminPanel() {
   const navItems: { id: Tab; label: string; icon: any; badge?: number }[] = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'premade', label: 'Pre-Made Products', icon: Flame, badge: preMadeProducts.length },
+    { id: 'services', label: 'Service Images', icon: ImageIcon, badge: adminServices.filter(service => service.heroImage).length },
     { id: 'etsy', label: 'Shop Products', icon: ShoppingBag, badge: etsyProducts.length },
     { id: 'premium', label: 'Signature Pieces', icon: Gem, badge: premiumProducts.length },
     { id: 'inquiries', label: 'Inquiries', icon: MessageSquare, badge: inquiries.length },
@@ -542,8 +671,9 @@ export function AdminPanel() {
           {tab === 'overview' && (
             <div>
               <SectionHeader title="Overview" sub="D & S Iron Works admin dashboard" />
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+              <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
                 <StatCard label="Pre-Made Products" value={preMadeProducts.length} icon={Flame} />
+                <StatCard label="Service Images" value={adminServices.filter(service => service.heroImage).length} icon={ImageIcon} />
                 <StatCard label="Shop Products" value={etsyProducts.length} icon={ShoppingBag} />
                 <StatCard label="Signature Pieces" value={premiumProducts.length} icon={Gem} />
                 <StatCard label="Inquiries" value={inquiries.length} icon={MessageSquare} />
@@ -633,6 +763,11 @@ export function AdminPanel() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* SERVICE IMAGES */}
+          {tab === 'services' && (
+            <ServiceImagesPanel services={adminServices} updateService={updateService} />
           )}
 
           {/* ETSY PRODUCTS */}

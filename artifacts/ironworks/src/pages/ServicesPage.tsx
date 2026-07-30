@@ -1,15 +1,23 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Phone } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Phone, PocketKnife } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { Navigation } from '@/components/Navigation';
 import { FloatingContactBanner } from '@/components/FloatingContactBanner';
 import { Embers } from '@/components/Embers';
 import { GlassButton } from '@/components/GlassButton';
-import { services } from '@/data/services';
+import { useAdminServices } from '@/hooks/useAdminProducts';
 import { useSeo } from '@/lib/seo';
 
 export function ServicesPage() {
   const [, navigate] = useLocation();
+  const { services } = useAdminServices();
+  const returnHome = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    navigate('/#custom-designs');
+  };
 
   useSeo({
     title: 'Custom Ironwork, Fire Pits, Railings & Metal Signs in Utah | D&S Iron Works',
@@ -38,7 +46,7 @@ export function ServicesPage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,77,0,0.06)_0%,transparent_62%)] pointer-events-none" />
         <div className="container mx-auto px-5 sm:px-6 md:px-12 relative z-10">
           <button
-            onClick={() => navigate('/')}
+            onClick={returnHome}
             className="flex items-center gap-2 text-white/35 hover:text-white transition-colors mb-10 group font-display tracking-wider text-sm uppercase"
           >
             <ArrowLeft size={15} className="group-hover:-translate-x-1 transition-transform" />
@@ -73,12 +81,21 @@ export function ServicesPage() {
               >
                 <button onClick={() => navigate(`/services/${service.slug}`)} className="block w-full text-left">
                   <div className="aspect-[4/3] overflow-hidden">
-                    <img
-                      src={service.heroImage}
-                      alt={`${service.title} by D&S Iron Works`}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      loading={i < 3 ? 'eager' : 'lazy'}
-                    />
+                    {service.heroImage ? (
+                      <img
+                        src={service.heroImage}
+                        alt={`${service.title} by D&S Iron Works`}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        loading={i < 3 ? 'eager' : 'lazy'}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-[linear-gradient(135deg,rgba(255,140,26,0.18),rgba(255,255,255,0.035)_45%,rgba(0,0,0,0.45))]">
+                        <PocketKnife size={40} className="text-orange-300/70" strokeWidth={1.4} />
+                        <span className="font-display text-xs uppercase tracking-[0.28em] text-white/55">
+                          Custom Blade Commissions
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="p-5 sm:p-6">
                     <span className="text-[10px] font-display tracking-[0.24em] uppercase text-orange-400/65 block mb-2">
