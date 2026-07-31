@@ -42,11 +42,23 @@ function readStorage<T>(key: string, fallback: T): T {
   }
 }
 
+function writeStorage(key: string, value: unknown) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    const name = error instanceof DOMException ? error.name : '';
+    if (/quota/i.test(name) || error instanceof DOMException) {
+      throw new Error('Browser storage quota exceeded while saving admin changes');
+    }
+    throw error;
+  }
+}
+
 function readEtsyProducts() {
   const current = readStorage<EtsyProduct[] | null>(ETSY_KEY, null);
   if (current) return current;
 
-  localStorage.setItem(ETSY_KEY, JSON.stringify(defaultEtsyProducts));
+  writeStorage(ETSY_KEY, defaultEtsyProducts);
   return defaultEtsyProducts;
 }
 
@@ -61,7 +73,7 @@ function mergeServices(stored: ServicePage[]) {
 function readServices() {
   const current = readStorage<ServicePage[] | null>(SERVICES_KEY, null);
   const merged = mergeServices(current ?? defaultServices);
-  if (!current) localStorage.setItem(SERVICES_KEY, JSON.stringify(merged));
+  if (!current) writeStorage(SERVICES_KEY, merged);
   return merged;
 }
 
@@ -71,8 +83,8 @@ export function useEtsyProducts() {
   );
 
   const setProducts = useCallback((updated: EtsyProduct[]) => {
+    writeStorage(ETSY_KEY, updated);
     setProductsState(updated);
-    localStorage.setItem(ETSY_KEY, JSON.stringify(updated));
   }, []);
 
   const addProduct = useCallback((p: EtsyProduct) => {
@@ -98,8 +110,8 @@ export function usePremiumProducts() {
   );
 
   const setProducts = useCallback((updated: PremiumProduct[]) => {
+    writeStorage(PREMIUM_KEY, updated);
     setProductsState(updated);
-    localStorage.setItem(PREMIUM_KEY, JSON.stringify(updated));
   }, []);
 
   const addProduct = useCallback((p: PremiumProduct) => {
@@ -125,8 +137,8 @@ export function usePreMadeProducts() {
   );
 
   const setProducts = useCallback((updated: PreMadeItem[]) => {
+    writeStorage(PREMADE_KEY, updated);
     setProductsState(updated);
-    localStorage.setItem(PREMADE_KEY, JSON.stringify(updated));
   }, []);
 
   const addProduct = useCallback((p: PreMadeItem) => {
@@ -153,8 +165,8 @@ export function useAdminServices() {
 
   const setServices = useCallback((updated: ServicePage[]) => {
     const merged = mergeServices(updated);
+    writeStorage(SERVICES_KEY, merged);
     setServicesState(merged);
-    localStorage.setItem(SERVICES_KEY, JSON.stringify(merged));
   }, []);
 
   const updateService = useCallback((service: ServicePage) => {

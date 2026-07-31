@@ -35,16 +35,72 @@ const iStyle: React.CSSProperties = { background: 'rgba(255,255,255,0.04)', bord
 function iFocus(e: React.FocusEvent<any>) { e.currentTarget.style.borderColor = 'rgba(255,140,26,0.5)'; }
 function iBlur(e: React.FocusEvent<any>) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }
 
+const MAX_UPLOAD_DIMENSION = 1600;
+const UPLOAD_JPEG_QUALITY = 0.82;
+
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = ev => resolve(String(ev.target?.result ?? ''));
+    reader.onerror = () => reject(reader.error ?? new Error('Could not read image file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadImage(src: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('Could not load image preview'));
+    image.src = src;
+  });
+}
+
+async function optimizeImageFile(file: File) {
+  const raw = await readFileAsDataUrl(file);
+  const image = await loadImage(raw).catch(() => null);
+  if (!image) return raw;
+
+  const scale = Math.min(1, MAX_UPLOAD_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight));
+  const width = Math.max(1, Math.round(image.naturalWidth * scale));
+  const height = Math.max(1, Math.round(image.naturalHeight * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d');
+  if (!context) return raw;
+  context.drawImage(image, 0, 0, width, height);
+  const optimized = canvas.toDataURL('image/jpeg', UPLOAD_JPEG_QUALITY);
+  return optimized.length < raw.length ? optimized : raw;
+}
+
+function adminSaveErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : '';
+  if (/quota|storage|exceeded/i.test(message)) {
+    return 'The browser ran out of space while saving these photos. The site now compresses new uploads; remove any extra-large uploaded photos from this product, re-upload them, and save again.';
+  }
+  return message || 'The changes could not be saved. Try a smaller image or use a public image URL.';
+}
+
 // ── Image upload helper ──────────────────────────────────────────
 function ImageField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [mode, setMode] = useState<'url' | 'file'>(value.startsWith('data:') ? 'file' : 'url');
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => onChange(ev.target?.result as string);
-    reader.readAsDataURL(file);
+    setUploading(true);
+    setUploadError('');
+    try {
+      onChange(await optimizeImageFile(file));
+    } catch {
+      setUploadError('Could not process that image. Try a JPG/PNG or use an image URL.');
+    } finally {
+      setUploading(false);
+      e.currentTarget.value = '';
+    }
   };
   return (
     <div className="flex flex-col gap-2">
@@ -66,11 +122,13 @@ function ImageField({ value, onChange }: { value: string; onChange: (v: string) 
         <div>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
           <button type="button" onClick={() => fileRef.current?.click()}
+            disabled={uploading}
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm text-white/50 hover:text-white transition-colors w-full"
             style={iStyle}>
             <Upload size={14} />
-            {value.startsWith('data:') ? 'Image uploaded — click to replace' : 'Choose image file'}
+            {uploading ? 'Optimizing image...' : value.startsWith('data:') ? 'Image uploaded — click to replace' : 'Choose image file'}
           </button>
+          {uploadError && <p className="mt-2 text-xs text-red-300/80 font-sans">{uploadError}</p>}
           {value.startsWith('data:') && (
             <img src={value} alt="preview" className="mt-2 h-20 w-20 object-cover rounded-lg border border-white/10" />
           )}
@@ -579,6 +637,7 @@ export function AdminPanel() {
   const [premiumModal, setPremiumModal] = useState<{ open: boolean; editing: PremiumProduct | null }>({ open: false, editing: null });
   const [preMadeModal, setPreMadeModal] = useState<{ open: boolean; editing: PreMadeItem | null }>({ open: false, editing: null });
   const [confirm, setConfirm] = useState<{ msg: string; onConfirm: () => void } | null>(null);
+  const [saveError, setSaveError] = useState('');
 
   const [settings, setSettings] = useState<SiteSettings>(getSettings());
   const [settingsSaved, setSettingsSaved] = useState(false);
@@ -603,6 +662,20 @@ export function AdminPanel() {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     setSettingsSaved(true);
     setTimeout(() => setSettingsSaved(false), 2000);
+  };
+
+  const saveAdminChange = (save: () => void, onSuccess?: () => void) => {
+    try {
+      save();
+      setSaveError('');
+      onSuccess?.();
+    } catch (error) {
+      setSaveError(adminSaveErrorMessage(error));
+    }
+  };
+
+  const updateServiceWithFeedback = (service: ServicePage) => {
+    saveAdminChange(() => updateService(service));
   };
 
   const navItems: { id: Tab; label: string; icon: any; badge?: number }[] = [
@@ -667,6 +740,18 @@ export function AdminPanel() {
 
         {/* Main content */}
         <main className="flex-1 min-w-0 p-6 md:p-10">
+          {saveError && (
+            <div className="rounded-xl p-4 mb-6 flex items-start justify-between gap-4" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(248,113,113,0.22)' }}>
+              <div>
+                <p className="font-display uppercase tracking-widest text-sm text-red-200 mb-1">Changes did not save</p>
+                <p className="text-sm text-red-100/70 font-sans leading-relaxed">{saveError}</p>
+              </div>
+              <button type="button" onClick={() => setSaveError('')} className="text-red-100/45 hover:text-red-100 transition-colors">
+                <X size={16} />
+              </button>
+            </div>
+          )}
+
           {/* OVERVIEW */}
           {tab === 'overview' && (
             <div>
@@ -767,7 +852,7 @@ export function AdminPanel() {
 
           {/* SERVICE IMAGES */}
           {tab === 'services' && (
-            <ServiceImagesPanel services={adminServices} updateService={updateService} />
+            <ServiceImagesPanel services={adminServices} updateService={updateServiceWithFeedback} />
           )}
 
           {/* ETSY PRODUCTS */}
@@ -971,19 +1056,28 @@ export function AdminPanel() {
       {etsyModal.open && (
         <Modal title={etsyModal.editing ? 'Edit Product' : 'Add Shop Product'} onClose={() => setEtsyModal({ open: false, editing: null })}>
           <EtsyForm initial={etsyModal.editing} onClose={() => setEtsyModal({ open: false, editing: null })}
-            onSave={p => { etsyModal.editing ? updateEtsy(p) : addEtsy(p); setEtsyModal({ open: false, editing: null }); }} />
+            onSave={p => saveAdminChange(
+              () => { etsyModal.editing ? updateEtsy(p) : addEtsy(p); },
+              () => setEtsyModal({ open: false, editing: null })
+            )} />
         </Modal>
       )}
       {premiumModal.open && (
         <Modal title={premiumModal.editing ? 'Edit Piece' : 'Add Signature Piece'} onClose={() => setPremiumModal({ open: false, editing: null })}>
           <PremiumForm initial={premiumModal.editing} onClose={() => setPremiumModal({ open: false, editing: null })}
-            onSave={p => { premiumModal.editing ? updatePremium(p) : addPremium(p); setPremiumModal({ open: false, editing: null }); }} />
+            onSave={p => saveAdminChange(
+              () => { premiumModal.editing ? updatePremium(p) : addPremium(p); },
+              () => setPremiumModal({ open: false, editing: null })
+            )} />
         </Modal>
       )}
       {preMadeModal.open && (
         <Modal title={preMadeModal.editing ? 'Edit Pre-Made Product' : 'Add Pre-Made Product'} onClose={() => setPreMadeModal({ open: false, editing: null })}>
           <PreMadeForm initial={preMadeModal.editing} onClose={() => setPreMadeModal({ open: false, editing: null })}
-            onSave={p => { preMadeModal.editing ? updatePreMade(p) : addPreMade(p); setPreMadeModal({ open: false, editing: null }); }} />
+            onSave={p => saveAdminChange(
+              () => { preMadeModal.editing ? updatePreMade(p) : addPreMade(p); },
+              () => setPreMadeModal({ open: false, editing: null })
+            )} />
         </Modal>
       )}
       {confirm && <Confirm msg={confirm.msg} onConfirm={confirm.onConfirm} onCancel={() => setConfirm(null)} />}
