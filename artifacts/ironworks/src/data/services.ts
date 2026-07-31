@@ -94,7 +94,7 @@ export const services: ServicePage[] = [
     metaTitle: 'Hand-Forged Knives | Custom Forged Blades by D&S Iron Works',
     metaDescription: 'Hand-forged knives and custom blade commissions by D&S Iron Works, including forged steel details, functional builds, and display pieces.',
     eyebrow: 'Forged Blades',
-    heroImage: '',
+    heroImage: '/images/hand-forged-knives.jpg',
     summary: 'Hand-forged knives are built as custom blade projects with shop-forged steel character, handle planning, and a direct conversation about the intended use or display.',
     details: [
       'Custom knife and blade concepts planned with Dallan',

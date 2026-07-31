@@ -7,7 +7,7 @@ import { ServicePage, services as defaultServices } from '@/data/services';
 const ETSY_KEY = 'ds_etsy_products_v5';
 const PREMIUM_KEY = 'ds_premium_products_v2';
 const PREMADE_KEY = 'ds_premade_products_v1';
-const SERVICES_KEY = 'ds_services_v1';
+const SERVICES_KEY = 'ds_services_v2';
 const ORDERS_KEY = 'ds_orders';
 const INQUIRIES_KEY = 'ds_inquiries';
 
