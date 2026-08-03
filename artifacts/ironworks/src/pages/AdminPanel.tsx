@@ -35,8 +35,8 @@ const iStyle: React.CSSProperties = { background: 'rgba(255,255,255,0.04)', bord
 function iFocus(e: React.FocusEvent<any>) { e.currentTarget.style.borderColor = 'rgba(255,140,26,0.5)'; }
 function iBlur(e: React.FocusEvent<any>) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }
 
-const MAX_UPLOAD_DIMENSION = 1600;
-const UPLOAD_JPEG_QUALITY = 0.82;
+const MAX_UPLOAD_DIMENSION = 1200;
+const UPLOAD_JPEG_QUALITY = 0.7;
 
 function readFileAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
@@ -58,6 +58,11 @@ function loadImage(src: string) {
 
 async function optimizeImageFile(file: File) {
   const raw = await readFileAsDataUrl(file);
+  return compactImageDataUrl(raw);
+}
+
+async function compactImageDataUrl(raw: string) {
+  if (!raw.startsWith('data:image/')) return raw;
   const image = await loadImage(raw).catch(() => null);
   if (!image) return raw;
 
@@ -74,10 +79,21 @@ async function optimizeImageFile(file: File) {
   return optimized.length < raw.length ? optimized : raw;
 }
 
+async function compactGalleryImages(gallery: PreMadeItem['gallery']) {
+  const compacted = [];
+  for (const image of gallery) {
+    compacted.push({
+      ...image,
+      src: await compactImageDataUrl(image.src),
+    });
+  }
+  return compacted;
+}
+
 function adminSaveErrorMessage(error: unknown) {
   const message = error instanceof Error ? error.message : '';
   if (/quota|storage|exceeded/i.test(message)) {
-    return 'The browser ran out of space while saving these photos. The site now compresses new uploads; remove any extra-large uploaded photos from this product, re-upload them, and save again.';
+    return 'The browser ran out of space while saving these photos. This update compresses all photos in a pre-made product while saving. Reload this page, edit the product again, and press Save Changes once more.';
   }
   return message || 'The changes could not be saved. Try a smaller image or use a public image URL.';
 }
@@ -256,6 +272,7 @@ function PreMadeForm({ initial, onSave, onClose }: { initial: PreMadeItem | null
   const [f, setF] = useState<PreMadeItem>(initial ?? emptyPreMade());
   const [featuresText, setFeaturesText] = useState((initial?.features ?? []).join('\n'));
   const [gallery, setGallery] = useState<PreMadeItem['gallery']>(initial?.gallery ?? []);
+  const [saving, setSaving] = useState(false);
   const [videoText, setVideoText] = useState(
     (initial?.videos ?? []).map(video => `${video.src} | ${video.poster} | ${video.title} | ${video.description} | ${video.aspect}`).join('\n')
   );
@@ -273,13 +290,14 @@ function PreMadeForm({ initial, onSave, onClose }: { initial: PreMadeItem | null
     });
   };
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
     const id = f.id || slugify(f.title) || `pm_${Date.now()}`;
     const features = featuresText.split('\n').map(s => s.trim()).filter(Boolean);
-    const cleanGallery = gallery
+    const cleanGallery = await compactGalleryImages(gallery
       .map(image => ({ src: image.src.trim(), alt: image.alt.trim() || f.title }))
-      .filter(image => image.src);
+      .filter(image => image.src));
     const videos = videoText.split('\n').map(line => {
       const [src = '', poster = '', title = '', description = '', aspect = 'wide'] = line.split('|').map(part => part.trim());
       return {
@@ -290,15 +308,25 @@ function PreMadeForm({ initial, onSave, onClose }: { initial: PreMadeItem | null
         aspect: aspect === 'portrait' ? 'portrait' as const : 'wide' as const,
       };
     }).filter(video => video.src && video.poster);
-    onSave({
-      ...f,
-      id,
-      alt: f.alt || f.title,
-      gallery: cleanGallery,
-      features,
-      videos: videos.length ? videos : undefined,
-      video: primaryVideo.src && primaryVideo.poster ? primaryVideo : undefined,
-    });
+    try {
+      onSave({
+        ...f,
+        id,
+        image: await compactImageDataUrl(f.image.trim()),
+        alt: f.alt || f.title,
+        gallery: cleanGallery,
+        features,
+        videos: videos.length ? videos : undefined,
+        video: primaryVideo.src && primaryVideo.poster
+          ? {
+              ...primaryVideo,
+              poster: await compactImageDataUrl(primaryVideo.poster.trim()),
+            }
+          : undefined,
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -417,8 +445,8 @@ function PreMadeForm({ initial, onSave, onClose }: { initial: PreMadeItem | null
         <textarea rows={4} value={videoText} onChange={e => setVideoText(e.target.value)} placeholder={"/images/walkaround.mp4 | /images/poster.jpg | Walkaround | Finished product view | wide"} className={inputCls('resize-none')} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
       </div>
       <div className="flex gap-3 pt-2">
-        <button type="submit" className="flex-1 py-2.5 rounded-lg font-display uppercase tracking-widest text-sm text-white" style={{ background: 'linear-gradient(135deg,#FF4D00,#FF8C1A)', boxShadow: '0 4px 16px rgba(255,77,0,0.25)' }}>
-          {initial ? 'Save Changes' : 'Add Pre-Made Product'}
+        <button type="submit" disabled={saving} className="flex-1 py-2.5 rounded-lg font-display uppercase tracking-widest text-sm text-white disabled:opacity-60" style={{ background: 'linear-gradient(135deg,#FF4D00,#FF8C1A)', boxShadow: '0 4px 16px rgba(255,77,0,0.25)' }}>
+          {saving ? 'Optimizing & Saving...' : initial ? 'Save Changes' : 'Add Pre-Made Product'}
         </button>
         <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-lg text-white/40 hover:text-white transition-colors text-sm" style={iStyle}>Cancel</button>
       </div>

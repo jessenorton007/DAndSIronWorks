@@ -43,11 +43,26 @@ function readStorage<T>(key: string, fallback: T): T {
 }
 
 function writeStorage(key: string, value: unknown) {
+  const serialized = JSON.stringify(value);
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    localStorage.setItem(key, serialized);
   } catch (error) {
     const name = error instanceof DOMException ? error.name : '';
     if (/quota/i.test(name) || error instanceof DOMException) {
+      const previous = localStorage.getItem(key);
+      try {
+        localStorage.removeItem(key);
+        localStorage.setItem(key, serialized);
+        return;
+      } catch {
+        if (previous !== null) {
+          try {
+            localStorage.setItem(key, previous);
+          } catch {
+            // Keep the original quota error message below.
+          }
+        }
+      }
       throw new Error('Browser storage quota exceeded while saving admin changes');
     }
     throw error;
