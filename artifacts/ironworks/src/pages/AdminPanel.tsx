@@ -56,9 +56,22 @@ function loadImage(src: string) {
   });
 }
 
+async function uploadAdminImage(dataUrl: string, filename: string) {
+  const response = await fetch('/api/admin/images', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ image: dataUrl, filename }),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || result?.ok === false || !result?.url) {
+    throw new Error(result?.error || 'Image upload failed');
+  }
+  return String(result.url);
+}
+
 async function optimizeImageFile(file: File) {
   const raw = await readFileAsDataUrl(file);
-  return compactImageDataUrl(raw);
+  return compactAndStoreImage(raw, file.name);
 }
 
 async function compactImageDataUrl(raw: string) {
@@ -79,12 +92,22 @@ async function compactImageDataUrl(raw: string) {
   return optimized.length < raw.length ? optimized : raw;
 }
 
+async function compactAndStoreImage(raw: string, filename = 'admin-image') {
+  if (!raw.startsWith('data:image/')) return raw;
+  const compacted = await compactImageDataUrl(raw);
+  try {
+    return await uploadAdminImage(compacted, filename);
+  } catch {
+    return compacted;
+  }
+}
+
 async function compactGalleryImages(gallery: PreMadeItem['gallery']) {
   const compacted = [];
   for (const image of gallery) {
     compacted.push({
       ...image,
-      src: await compactImageDataUrl(image.src),
+      src: await compactAndStoreImage(image.src, image.alt || 'gallery-photo'),
     });
   }
   return compacted;
@@ -93,9 +116,9 @@ async function compactGalleryImages(gallery: PreMadeItem['gallery']) {
 function adminSaveErrorMessage(error: unknown) {
   const message = error instanceof Error ? error.message : '';
   if (/quota|storage|exceeded/i.test(message)) {
-    return 'The browser ran out of space while saving these photos. This update compresses all photos in a pre-made product while saving. Reload this page, edit the product again, and press Save Changes once more.';
+    return 'The browser ran out of space while saving these photos. Reload this page, replace any old uploaded photos once more, and save again. New uploads are now saved as site image files instead of browser storage.';
   }
-  return message || 'The changes could not be saved. Try a smaller image or use a public image URL.';
+  return message || 'The changes could not be saved. Try the upload again or use a public image URL.';
 }
 
 // ── Image upload helper ──────────────────────────────────────────
@@ -312,7 +335,7 @@ function PreMadeForm({ initial, onSave, onClose }: { initial: PreMadeItem | null
       onSave({
         ...f,
         id,
-        image: await compactImageDataUrl(f.image.trim()),
+        image: await compactAndStoreImage(f.image.trim(), `${id}-main`),
         alt: f.alt || f.title,
         gallery: cleanGallery,
         features,
@@ -320,7 +343,7 @@ function PreMadeForm({ initial, onSave, onClose }: { initial: PreMadeItem | null
         video: primaryVideo.src && primaryVideo.poster
           ? {
               ...primaryVideo,
-              poster: await compactImageDataUrl(primaryVideo.poster.trim()),
+              poster: await compactAndStoreImage(primaryVideo.poster.trim(), `${id}-video-poster`),
             }
           : undefined,
       });
