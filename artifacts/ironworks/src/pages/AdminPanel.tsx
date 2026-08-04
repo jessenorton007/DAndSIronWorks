@@ -332,7 +332,7 @@ function PreMadeForm({
   onError,
 }: {
   initial: PreMadeItem | null;
-  onSave: (p: PreMadeItem) => void;
+  onSave: (p: PreMadeItem) => void | Promise<void>;
   onClose: () => void;
   onError?: (error: unknown) => void;
 }) {
@@ -340,6 +340,7 @@ function PreMadeForm({
   const [featuresText, setFeaturesText] = useState((initial?.features ?? []).join('\n'));
   const [gallery, setGallery] = useState<PreMadeItem['gallery']>(initial?.gallery ?? []);
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState('');
   const [videoText, setVideoText] = useState(
     (initial?.videos ?? []).map(video => `${video.src} | ${video.poster} | ${video.title} | ${video.description} | ${video.aspect}`).join('\n')
   );
@@ -360,6 +361,7 @@ function PreMadeForm({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setFormError('');
     const id = f.id || slugify(f.title) || `pm_${Date.now()}`;
     const features = featuresText.split('\n').map(s => s.trim()).filter(Boolean);
     try {
@@ -376,7 +378,7 @@ function PreMadeForm({
           aspect: aspect === 'portrait' ? 'portrait' as const : 'wide' as const,
         };
       }).filter(video => video.src && video.poster);
-      onSave({
+      await onSave({
         ...f,
         id,
         image: await compactAndStoreImage(f.image.trim(), `${id}-main`),
@@ -392,6 +394,7 @@ function PreMadeForm({
           : undefined,
       });
     } catch (error) {
+      setFormError(adminSaveErrorMessage(error));
       onError?.(error);
     } finally {
       setSaving(false);
@@ -400,6 +403,11 @@ function PreMadeForm({
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
+      {formError && (
+        <div className="rounded-lg px-4 py-3 text-sm text-red-100/80 font-sans leading-relaxed" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(248,113,113,0.22)' }}>
+          {formError}
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Title *</label>
@@ -761,9 +769,9 @@ export function AdminPanel() {
     setTimeout(() => setSettingsSaved(false), 2000);
   };
 
-  const saveAdminChange = (save: () => void, onSuccess?: () => void) => {
+  const saveAdminChange = async (save: () => void | Promise<void>, onSuccess?: () => void) => {
     try {
-      save();
+      await save();
       setSaveError('');
       onSuccess?.();
     } catch (error) {
@@ -772,12 +780,12 @@ export function AdminPanel() {
   };
 
   const updateServiceWithFeedback = (service: ServicePage) => {
-    saveAdminChange(() => updateService(service));
+    void saveAdminChange(() => updateService(service));
   };
 
   const hasPreMadeBrowserStoredImages = preMadeProducts.some(preMadeHasBrowserStoredImages);
   const clearPreMadeBrowserStoredImages = () => {
-    saveAdminChange(() => setPreMadeProducts(preMadeProducts.map(stripPreMadeBrowserStoredImages)));
+    void saveAdminChange(() => setPreMadeProducts(preMadeProducts.map(stripPreMadeBrowserStoredImages)));
   };
 
   const navItems: { id: Tab; label: string; icon: any; badge?: number }[] = [
@@ -951,7 +959,7 @@ export function AdminPanel() {
                           <button onClick={() => navigate(`/pre-made/${p.id}`)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-orange-400 transition-colors" style={iStyle}>
                             <ExternalLink size={12} />
                           </button>
-                          <button onClick={() => setConfirm({ msg: `Delete "${p.title}"?`, onConfirm: () => { removePreMade(p.id); setConfirm(null); } })} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/30 hover:text-red-400 transition-colors" style={iStyle}>
+                          <button onClick={() => setConfirm({ msg: `Delete "${p.title}"?`, onConfirm: () => { void saveAdminChange(() => removePreMade(p.id), () => setConfirm(null)); } })} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/30 hover:text-red-400 transition-colors" style={iStyle}>
                             <Trash2 size={12} />
                           </button>
                         </div>
@@ -1189,7 +1197,7 @@ export function AdminPanel() {
           <PreMadeForm initial={preMadeModal.editing} onClose={() => setPreMadeModal({ open: false, editing: null })}
             onError={error => setSaveError(adminSaveErrorMessage(error))}
             onSave={p => saveAdminChange(
-              () => { preMadeModal.editing ? updatePreMade(p) : addPreMade(p); },
+              async () => { preMadeModal.editing ? await updatePreMade(p) : await addPreMade(p); },
               () => setPreMadeModal({ open: false, editing: null })
             )} />
         </Modal>

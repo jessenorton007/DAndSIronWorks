@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { EtsyProduct, defaultEtsyProducts } from '@/data/etsy-products';
 import { PremiumProduct, defaultPremiumProducts } from '@/data/premium-products';
 import { PreMadeItem, preMadeItems as defaultPreMadeItems } from '@/data/premade-items';
@@ -66,6 +66,60 @@ function writeStorage(key: string, value: unknown) {
       throw new Error('Browser storage quota exceeded while saving admin changes');
     }
     throw error;
+  }
+}
+
+function mirrorStorage(key: string, value: unknown) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Server-backed admin data should not fail just because browser storage is full.
+  }
+}
+
+function isBrowserStoredImage(value: string | undefined) {
+  return typeof value === 'string' && value.startsWith('data:image/');
+}
+
+function stripBrowserStoredPreMadeImages(product: PreMadeItem): PreMadeItem {
+  return {
+    ...product,
+    image: isBrowserStoredImage(product.image) ? '' : product.image,
+    gallery: (product.gallery ?? [])
+      .map(image => ({ ...image, src: isBrowserStoredImage(image.src) ? '' : image.src }))
+      .filter(image => image.src),
+    video: product.video
+      ? { ...product.video, poster: isBrowserStoredImage(product.video.poster) ? '' : product.video.poster }
+      : undefined,
+    videos: product.videos?.map(video => ({
+      ...video,
+      poster: isBrowserStoredImage(video.poster) ? '' : video.poster,
+    })),
+  };
+}
+
+function readLocalPreMadeProducts() {
+  return readStorage<PreMadeItem[]>(PREMADE_KEY, defaultPreMadeItems).map(stripBrowserStoredPreMadeImages);
+}
+
+async function readServerPreMadeProducts() {
+  const response = await fetch('/api/admin/premade-products');
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || result?.ok === false || !Array.isArray(result?.products)) {
+    throw new Error(result?.error || 'Could not load server pre-made products.');
+  }
+  return result.products as PreMadeItem[];
+}
+
+async function saveServerPreMadeProducts(products: PreMadeItem[]) {
+  const response = await fetch('/api/admin/premade-products', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ products }),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || result?.ok === false) {
+    throw new Error(result?.error || 'Could not save pre-made products on the server.');
   }
 }
 
@@ -147,28 +201,42 @@ export function usePremiumProducts() {
 }
 
 export function usePreMadeProducts() {
-  const [products, setProductsState] = useState<PreMadeItem[]>(() =>
-    readStorage<PreMadeItem[]>(PREMADE_KEY, defaultPreMadeItems)
-  );
+  const [products, setProductsState] = useState<PreMadeItem[]>(() => readLocalPreMadeProducts());
 
-  const setProducts = useCallback((updated: PreMadeItem[]) => {
-    writeStorage(PREMADE_KEY, updated);
+  useEffect(() => {
+    let cancelled = false;
+    readServerPreMadeProducts()
+      .then(serverProducts => {
+        if (cancelled) return;
+        if (serverProducts.length > 0) {
+          setProductsState(serverProducts);
+          mirrorStorage(PREMADE_KEY, serverProducts);
+          return;
+        }
+
+        const localProducts = readLocalPreMadeProducts();
+        setProductsState(localProducts);
+      })
+      .catch(() => {
+        if (!cancelled) setProductsState(readLocalPreMadeProducts());
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const setProducts = useCallback(async (updated: PreMadeItem[]) => {
+    await saveServerPreMadeProducts(updated);
+    mirrorStorage(PREMADE_KEY, updated);
     setProductsState(updated);
   }, []);
 
-  const addProduct = useCallback((p: PreMadeItem) => {
-    setProducts([...readStorage<PreMadeItem[]>(PREMADE_KEY, defaultPreMadeItems), p]);
-  }, [setProducts]);
+  const addProduct = useCallback((p: PreMadeItem) => setProducts([...products, p]), [products, setProducts]);
 
-  const updateProduct = useCallback((p: PreMadeItem) => {
-    const all = readStorage<PreMadeItem[]>(PREMADE_KEY, defaultPreMadeItems);
-    setProducts(all.map(x => x.id === p.id ? p : x));
-  }, [setProducts]);
+  const updateProduct = useCallback((p: PreMadeItem) => setProducts(products.map(x => x.id === p.id ? p : x)), [products, setProducts]);
 
-  const removeProduct = useCallback((id: string) => {
-    const all = readStorage<PreMadeItem[]>(PREMADE_KEY, defaultPreMadeItems);
-    setProducts(all.filter(x => x.id !== id));
-  }, [setProducts]);
+  const removeProduct = useCallback((id: string) => setProducts(products.filter(x => x.id !== id)), [products, setProducts]);
 
   return { products, setProducts, addProduct, updateProduct, removeProduct };
 }

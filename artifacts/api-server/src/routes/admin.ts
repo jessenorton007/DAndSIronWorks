@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Router } from "express";
-import { adminUploadDir } from "../lib/upload-dir";
+import { adminDataDir, adminUploadDir } from "../lib/upload-dir";
 
 const router = Router();
 const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
+const preMadeProductsPath = () => path.join(adminDataDir(), "premade-products.json");
 
 const mimeExtensions: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -21,6 +22,54 @@ function cleanName(value: unknown) {
     .replace(/^-+|-+$/g, "")
     .slice(0, 48) || "upload";
 }
+
+async function readPreMadeProducts() {
+  try {
+    const raw = await readFile(preMadeProductsPath(), "utf8");
+    const parsed = JSON.parse(raw) as unknown;
+    if (Array.isArray(parsed)) return parsed;
+    if (parsed && typeof parsed === "object" && Array.isArray((parsed as { products?: unknown }).products)) {
+      return (parsed as { products: unknown[] }).products;
+    }
+  } catch {
+    // No saved admin data yet.
+  }
+  return [];
+}
+
+function validatePreMadeProducts(value: unknown) {
+  if (!Array.isArray(value)) {
+    throw new Error("Pre-made products payload must be an array.");
+  }
+
+  const serialized = JSON.stringify(value);
+  if (serialized.includes("data:image/")) {
+    throw new Error("Uploaded photos must be saved as site image files before saving products.");
+  }
+
+  return value;
+}
+
+router.get("/admin/premade-products", async (_req, res) => {
+  const products = await readPreMadeProducts();
+  res.json({ ok: true, products });
+});
+
+router.put("/admin/premade-products", async (req, res) => {
+  try {
+    const products = validatePreMadeProducts(req.body?.products);
+    const dataDir = adminDataDir();
+    await mkdir(dataDir, { recursive: true });
+    await writeFile(
+      preMadeProductsPath(),
+      JSON.stringify({ products, updatedAt: new Date().toISOString() }, null, 2),
+      "utf8",
+    );
+    res.json({ ok: true, products });
+  } catch (error) {
+    res.status(400).json({ ok: false, error: error instanceof Error ? error.message : "Could not save pre-made products." });
+  }
+});
 
 router.post("/admin/images", async (req, res) => {
   try {
