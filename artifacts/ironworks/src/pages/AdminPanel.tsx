@@ -57,14 +57,19 @@ function loadImage(src: string) {
 }
 
 async function uploadAdminImage(dataUrl: string, filename: string) {
-  const response = await fetch('/api/admin/images', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ image: dataUrl, filename }),
-  });
+  let response: Response;
+  try {
+    response = await fetch('/api/admin/images', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: dataUrl, filename }),
+    });
+  } catch {
+    throw new Error('Image upload API is not reachable. Make sure the API server is running, reload the admin page, then upload the photos again.');
+  }
   const result = await response.json().catch(() => ({}));
   if (!response.ok || result?.ok === false || !result?.url) {
-    throw new Error(result?.error || 'Image upload failed');
+    throw new Error(result?.error || 'Image upload failed. Make sure the API server can write to the admin uploads folder.');
   }
   return String(result.url);
 }
@@ -95,11 +100,7 @@ async function compactImageDataUrl(raw: string) {
 async function compactAndStoreImage(raw: string, filename = 'admin-image') {
   if (!raw.startsWith('data:image/')) return raw;
   const compacted = await compactImageDataUrl(raw);
-  try {
-    return await uploadAdminImage(compacted, filename);
-  } catch {
-    return compacted;
-  }
+  return uploadAdminImage(compacted, filename);
 }
 
 async function compactGalleryImages(gallery: PreMadeItem['gallery']) {
@@ -115,10 +116,43 @@ async function compactGalleryImages(gallery: PreMadeItem['gallery']) {
 
 function adminSaveErrorMessage(error: unknown) {
   const message = error instanceof Error ? error.message : '';
+  if (/image upload|upload api|api server|admin uploads/i.test(message)) {
+    return message;
+  }
   if (/quota|storage|exceeded/i.test(message)) {
-    return 'The browser ran out of space while saving these photos. Reload this page, replace any old uploaded photos once more, and save again. New uploads are now saved as site image files instead of browser storage.';
+    return 'The browser still has old oversized uploaded photos saved locally. Use the Pre-Made Products cleanup button to remove old browser-stored photos, then upload the photos again.';
   }
   return message || 'The changes could not be saved. Try the upload again or use a public image URL.';
+}
+
+function isBrowserStoredImage(value: string | undefined) {
+  return typeof value === 'string' && value.startsWith('data:image/');
+}
+
+function preMadeHasBrowserStoredImages(product: PreMadeItem) {
+  return [
+    product.image,
+    product.video?.poster,
+    ...(product.gallery ?? []).map(image => image.src),
+    ...(product.videos ?? []).map(video => video.poster),
+  ].some(isBrowserStoredImage);
+}
+
+function stripPreMadeBrowserStoredImages(product: PreMadeItem): PreMadeItem {
+  return {
+    ...product,
+    image: isBrowserStoredImage(product.image) ? '' : product.image,
+    gallery: (product.gallery ?? [])
+      .map(image => ({ ...image, src: isBrowserStoredImage(image.src) ? '' : image.src }))
+      .filter(image => image.src),
+    video: product.video
+      ? { ...product.video, poster: isBrowserStoredImage(product.video.poster) ? '' : product.video.poster }
+      : undefined,
+    videos: product.videos?.map(video => ({
+      ...video,
+      poster: isBrowserStoredImage(video.poster) ? '' : video.poster,
+    })),
+  };
 }
 
 // ── Image upload helper ──────────────────────────────────────────
@@ -134,8 +168,8 @@ function ImageField({ value, onChange }: { value: string; onChange: (v: string) 
     setUploadError('');
     try {
       onChange(await optimizeImageFile(file));
-    } catch {
-      setUploadError('Could not process that image. Try a JPG/PNG or use an image URL.');
+    } catch (error) {
+      setUploadError(adminSaveErrorMessage(error));
     } finally {
       setUploading(false);
       e.currentTarget.value = '';
@@ -291,7 +325,17 @@ const slugify = (value: string) =>
     .replace(/^-+|-+$/g, '')
     .slice(0, 80);
 
-function PreMadeForm({ initial, onSave, onClose }: { initial: PreMadeItem | null; onSave: (p: PreMadeItem) => void; onClose: () => void }) {
+function PreMadeForm({
+  initial,
+  onSave,
+  onClose,
+  onError,
+}: {
+  initial: PreMadeItem | null;
+  onSave: (p: PreMadeItem) => void;
+  onClose: () => void;
+  onError?: (error: unknown) => void;
+}) {
   const [f, setF] = useState<PreMadeItem>(initial ?? emptyPreMade());
   const [featuresText, setFeaturesText] = useState((initial?.features ?? []).join('\n'));
   const [gallery, setGallery] = useState<PreMadeItem['gallery']>(initial?.gallery ?? []);
@@ -318,20 +362,20 @@ function PreMadeForm({ initial, onSave, onClose }: { initial: PreMadeItem | null
     setSaving(true);
     const id = f.id || slugify(f.title) || `pm_${Date.now()}`;
     const features = featuresText.split('\n').map(s => s.trim()).filter(Boolean);
-    const cleanGallery = await compactGalleryImages(gallery
-      .map(image => ({ src: image.src.trim(), alt: image.alt.trim() || f.title }))
-      .filter(image => image.src));
-    const videos = videoText.split('\n').map(line => {
-      const [src = '', poster = '', title = '', description = '', aspect = 'wide'] = line.split('|').map(part => part.trim());
-      return {
-        src,
-        poster,
-        title: title || f.title,
-        description,
-        aspect: aspect === 'portrait' ? 'portrait' as const : 'wide' as const,
-      };
-    }).filter(video => video.src && video.poster);
     try {
+      const cleanGallery = await compactGalleryImages(gallery
+        .map(image => ({ src: image.src.trim(), alt: image.alt.trim() || f.title }))
+        .filter(image => image.src));
+      const videos = videoText.split('\n').map(line => {
+        const [src = '', poster = '', title = '', description = '', aspect = 'wide'] = line.split('|').map(part => part.trim());
+        return {
+          src,
+          poster,
+          title: title || f.title,
+          description,
+          aspect: aspect === 'portrait' ? 'portrait' as const : 'wide' as const,
+        };
+      }).filter(video => video.src && video.poster);
       onSave({
         ...f,
         id,
@@ -347,6 +391,8 @@ function PreMadeForm({ initial, onSave, onClose }: { initial: PreMadeItem | null
             }
           : undefined,
       });
+    } catch (error) {
+      onError?.(error);
     } finally {
       setSaving(false);
     }
@@ -679,7 +725,7 @@ export function AdminPanel() {
 
   const { products: etsyProducts, addProduct: addEtsy, updateProduct: updateEtsy, removeProduct: removeEtsy } = useEtsyProducts();
   const { products: premiumProducts, addProduct: addPremium, updateProduct: updatePremium, removeProduct: removePremium } = usePremiumProducts();
-  const { products: preMadeProducts, addProduct: addPreMade, updateProduct: updatePreMade, removeProduct: removePreMade } = usePreMadeProducts();
+  const { products: preMadeProducts, setProducts: setPreMadeProducts, addProduct: addPreMade, updateProduct: updatePreMade, removeProduct: removePreMade } = usePreMadeProducts();
   const { services: adminServices, updateService } = useAdminServices();
   const [orders, setOrders] = useState<Order[]>(() => getOrders());
   const [inquiries, setInquiries] = useState<Inquiry[]>(() => getInquiries());
@@ -727,6 +773,11 @@ export function AdminPanel() {
 
   const updateServiceWithFeedback = (service: ServicePage) => {
     saveAdminChange(() => updateService(service));
+  };
+
+  const hasPreMadeBrowserStoredImages = preMadeProducts.some(preMadeHasBrowserStoredImages);
+  const clearPreMadeBrowserStoredImages = () => {
+    saveAdminChange(() => setPreMadeProducts(preMadeProducts.map(stripPreMadeBrowserStoredImages)));
   };
 
   const navItems: { id: Tab; label: string; icon: any; badge?: number }[] = [
@@ -851,9 +902,20 @@ export function AdminPanel() {
                 }
               />
               <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(255,140,26,0.06)', border: '1px solid rgba(255,140,26,0.18)' }}>
-                <p className="text-sm text-orange-100/75 font-sans leading-relaxed">
-                  Use this tab to change rocket stove pictures, reorder galleries, edit prices, and update QuickBooks payment links. Uploaded image files are saved in this browser; public site assets are still best for final production images.
-                </p>
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <p className="text-sm text-orange-100/75 font-sans leading-relaxed">
+                    Use this tab to change rocket stove pictures, reorder galleries, edit prices, and update QuickBooks payment links. New uploads are saved as site image files through the API instead of browser storage.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={clearPreMadeBrowserStoredImages}
+                    disabled={!hasPreMadeBrowserStoredImages}
+                    className="shrink-0 rounded-lg px-4 py-2 text-xs font-display uppercase tracking-widest text-orange-100 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-45"
+                    style={{ background: 'rgba(255,140,26,0.14)', border: '1px solid rgba(255,140,26,0.28)' }}
+                  >
+                    {hasPreMadeBrowserStoredImages ? 'Clear Old Browser Uploads' : 'No Browser Uploads Found'}
+                  </button>
+                </div>
               </div>
               {preMadeProducts.length === 0 ? (
                 <div className="rounded-xl flex flex-col items-center justify-center py-24 gap-4" style={{ border: '1px dashed rgba(255,255,255,0.1)' }}>
@@ -1125,6 +1187,7 @@ export function AdminPanel() {
       {preMadeModal.open && (
         <Modal title={preMadeModal.editing ? 'Edit Pre-Made Product' : 'Add Pre-Made Product'} onClose={() => setPreMadeModal({ open: false, editing: null })}>
           <PreMadeForm initial={preMadeModal.editing} onClose={() => setPreMadeModal({ open: false, editing: null })}
+            onError={error => setSaveError(adminSaveErrorMessage(error))}
             onSave={p => saveAdminChange(
               () => { preMadeModal.editing ? updatePreMade(p) : addPreMade(p); },
               () => setPreMadeModal({ open: false, editing: null })
