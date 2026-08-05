@@ -71,7 +71,7 @@ function writeStorage(key: string, value: unknown) {
 
 function mirrorStorage(key: string, value: unknown) {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    writeStorage(key, value);
   } catch {
     // Server-backed admin data should not fail just because browser storage is full.
   }
@@ -227,9 +227,19 @@ export function usePreMadeProducts() {
   }, []);
 
   const setProducts = useCallback(async (updated: PreMadeItem[]) => {
-    await saveServerPreMadeProducts(updated);
-    mirrorStorage(PREMADE_KEY, updated);
-    setProductsState(updated);
+    const cleaned = updated.map(stripBrowserStoredPreMadeImages);
+
+    try {
+      await saveServerPreMadeProducts(cleaned);
+    } catch (serverError) {
+      writeStorage(PREMADE_KEY, cleaned);
+      setProductsState(cleaned);
+      console.warn('Pre-made products saved in browser fallback because server save failed.', serverError);
+      return;
+    }
+
+    mirrorStorage(PREMADE_KEY, cleaned);
+    setProductsState(cleaned);
   }, []);
 
   const addProduct = useCallback((p: PreMadeItem) => setProducts([...products, p]), [products, setProducts]);

@@ -779,13 +779,14 @@ export function AdminPanel() {
     setTimeout(() => setSettingsSaved(false), 2000);
   };
 
-  const saveAdminChange = async (save: () => void | Promise<void>, onSuccess?: () => void) => {
+  const saveAdminChange = async (save: () => void | Promise<void>, onSuccess?: () => void, options?: { rethrow?: boolean }) => {
     try {
       await save();
       setSaveError('');
       onSuccess?.();
     } catch (error) {
       setSaveError(adminSaveErrorMessage(error));
+      if (options?.rethrow) throw error;
     }
   };
 
@@ -1208,7 +1209,8 @@ export function AdminPanel() {
             onError={error => setSaveError(adminSaveErrorMessage(error))}
             onSave={p => saveAdminChange(
               async () => { preMadeModal.editing ? await updatePreMade(p) : await addPreMade(p); },
-              () => setPreMadeModal({ open: false, editing: null })
+              () => setPreMadeModal({ open: false, editing: null }),
+              { rethrow: true }
             )} />
         </Modal>
       )}
