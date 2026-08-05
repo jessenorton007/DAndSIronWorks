@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, ExternalLink, CheckCircle } from 'lucide-react';
 import { useEtsyProducts } from '@/hooks/useAdminProducts';
 import { GlassButton } from '@/components/GlassButton';
+import { FormattedDescription } from '@/components/FormattedDescription';
 import { Navigation } from '@/components/Navigation';
 import { FloatingContactBanner } from '@/components/FloatingContactBanner';
 import { useSeo } from '@/lib/seo';
@@ -117,9 +118,10 @@ export function ProductPage() {
 
               <div className="w-full h-px mb-8" style={{ background: 'linear-gradient(90deg, rgba(255,140,26,0.3), transparent)' }} />
 
-              <p className="text-white/65 leading-relaxed mb-8 text-base font-sans">
-                {product.description}
-              </p>
+              <FormattedDescription
+                text={product.description}
+                className="text-white/65 leading-relaxed mb-8 text-base font-sans space-y-4"
+              />
 
               {product.details && product.details.length > 0 && (
                 <div className="mb-10 space-y-3">

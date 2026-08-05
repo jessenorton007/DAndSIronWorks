@@ -34,6 +34,7 @@ function inputCls(extra = '') {
 const iStyle: React.CSSProperties = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' };
 function iFocus(e: React.FocusEvent<any>) { e.currentTarget.style.borderColor = 'rgba(255,140,26,0.5)'; }
 function iBlur(e: React.FocusEvent<any>) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }
+const descriptionInputCls = inputCls('resize-y min-h-36 whitespace-pre-wrap');
 
 const MAX_UPLOAD_DIMENSION = 1200;
 const UPLOAD_JPEG_QUALITY = 0.7;
@@ -255,7 +256,7 @@ function EtsyForm({ initial, onSave, onClose }: { initial: EtsyProduct | null; o
       </div>
       <div>
         <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Description *</label>
-        <textarea required rows={3} value={f.description} onChange={e => set('description', e.target.value)} placeholder="Describe the product..." className={inputCls('resize-none')} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+        <textarea required rows={6} value={f.description} onChange={e => set('description', e.target.value)} placeholder="Describe the product..." className={descriptionInputCls} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
       </div>
       <div>
         <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Specs / Details <span className="text-white/25 normal-case font-sans tracking-normal">(one per line)</span></label>
@@ -300,7 +301,7 @@ function PremiumForm({ initial, onSave, onClose }: { initial: PremiumProduct | n
       </div>
       <div>
         <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Description *</label>
-        <textarea required rows={4} value={f.description} onChange={e => set('description', e.target.value)} placeholder="Describe this signature piece..." className={inputCls('resize-none')} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+        <textarea required rows={6} value={f.description} onChange={e => set('description', e.target.value)} placeholder="Describe this signature piece..." className={descriptionInputCls} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
       </div>
       <div className="flex gap-3 pt-2">
         <button type="submit" className="flex-1 py-2.5 rounded-lg font-display uppercase tracking-widest text-sm text-white" style={{ background: 'linear-gradient(135deg,#FF4D00,#FF8C1A)', boxShadow: '0 4px 16px rgba(255,77,0,0.25)' }}>
@@ -447,7 +448,7 @@ function PreMadeForm({
       </div>
       <div>
         <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">Description *</label>
-        <textarea required rows={3} value={f.description} onChange={e => set('description', e.target.value)} placeholder="Describe this ready-built product..." className={inputCls('resize-none')} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
+        <textarea required rows={7} value={f.description} onChange={e => set('description', e.target.value)} placeholder="Describe this ready-built product..." className={descriptionInputCls} style={iStyle} onFocus={iFocus} onBlur={iBlur} />
       </div>
       <div>
         <label className="block text-xs font-display tracking-widest uppercase text-white/40 mb-1.5">QuickBooks Payment Link</label>
@@ -953,7 +954,7 @@ export function AdminPanel() {
                           <p className="text-orange-400/80 text-sm font-sans whitespace-nowrap">{p.priceLabel}</p>
                         </div>
                         <p className="text-white/25 text-xs font-sans mb-3">/{p.id}</p>
-                        <p className="text-white/35 text-xs font-sans flex-1 line-clamp-3">{p.description}</p>
+                        <p className="text-white/35 text-xs font-sans flex-1 line-clamp-3 whitespace-pre-line">{p.description}</p>
                         <div className="flex flex-wrap gap-1.5 mt-4">
                           {p.features.slice(0, 3).map(feature => (
                             <span key={feature} className="rounded-full px-2 py-0.5 text-[10px] font-display tracking-widest uppercase text-white/40 bg-white/[0.035] border border-white/10">
@@ -1013,7 +1014,7 @@ export function AdminPanel() {
                       <div className="p-4 flex flex-col flex-1">
                         <p className="font-display uppercase tracking-wider text-white text-sm mb-1">{p.title}</p>
                         <p className="text-orange-400/80 text-sm mb-3 font-sans">{p.priceLabel}</p>
-                        <p className="text-white/35 text-xs font-sans flex-1 line-clamp-2">{p.description}</p>
+                        <p className="text-white/35 text-xs font-sans flex-1 line-clamp-2 whitespace-pre-line">{p.description}</p>
                         <div className="flex gap-2 mt-4">
                           <button onClick={() => setEtsyModal({ open: true, editing: p })} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-white transition-colors flex-1 justify-center" style={iStyle}>
                             <Pencil size={12} /> Edit
@@ -1061,7 +1062,7 @@ export function AdminPanel() {
                       <div className="p-4 flex flex-col flex-1">
                         <p className="font-display uppercase tracking-wider text-white text-sm mb-1">{p.title}</p>
                         <p className="text-orange-400/80 text-sm mb-3 font-sans">{p.priceLabel}</p>
-                        <p className="text-white/35 text-xs font-sans flex-1 line-clamp-2">{p.description}</p>
+                        <p className="text-white/35 text-xs font-sans flex-1 line-clamp-2 whitespace-pre-line">{p.description}</p>
                         <div className="flex gap-2 mt-4">
                           <button onClick={() => setPremiumModal({ open: true, editing: p })} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-white transition-colors flex-1 justify-center" style={iStyle}>
                             <Pencil size={12} /> Edit

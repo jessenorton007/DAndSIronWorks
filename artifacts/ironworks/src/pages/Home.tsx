@@ -5,6 +5,7 @@ import { PocketKnife } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { Embers } from "@/components/Embers";
 import { GlassButton } from "@/components/GlassButton";
+import { FormattedDescription } from "@/components/FormattedDescription";
 import { CheckoutModal } from "@/components/CheckoutModal";
 import { PreMadePurchaseModal } from "@/components/PreMadePurchaseModal";
 import { FloatingContactBanner } from "@/components/FloatingContactBanner";
@@ -197,9 +198,10 @@ function PreMadeItemCard({
               <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-widest text-white mb-3">
                 Pack-Flat Deer Panel Fire Pit
               </h3>
-              <p className="text-white/58 text-sm font-sans leading-relaxed">
-                {item.description} The panel design packs down for transport, then locks into a sturdy outdoor fire pit with deer cutout details on each side.
-              </p>
+              <FormattedDescription
+                text={`${item.description}\n\nThe panel design packs down for transport, then locks into a sturdy outdoor fire pit with deer cutout details on each side.`}
+                className="text-white/58 text-sm font-sans leading-relaxed space-y-3"
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -267,9 +269,10 @@ function PreMadeItemCard({
           </div>
         </div>
         <div className="p-5 sm:p-6 flex flex-col gap-5">
-          <p className="text-white/58 text-sm font-sans leading-relaxed">
-            {item.description}
-          </p>
+          <FormattedDescription
+            text={item.description}
+            className="text-white/58 text-sm font-sans leading-relaxed space-y-3"
+          />
           <div className="grid grid-cols-2 gap-3">
             {item.gallery.map((image) => (
               <div key={image.src} className="aspect-[4/3] rounded-lg overflow-hidden bg-black/50" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
@@ -845,7 +848,10 @@ export function Home() {
                   </div>
                   <div className="p-5 sm:p-7 flex flex-col flex-1">
                     <h3 className="font-display text-lg sm:text-xl uppercase tracking-wider text-white mb-2">{product.title}</h3>
-                    <p className="text-white/55 text-sm mb-6 flex-1 font-sans leading-relaxed">{product.description}</p>
+                    <FormattedDescription
+                      text={product.description}
+                      className="text-white/55 text-sm mb-6 flex-1 font-sans leading-relaxed space-y-3"
+                    />
                     <div className="flex items-center justify-between mt-auto">
                       <span className="font-display text-xl sm:text-2xl tracking-wider text-forge-gradient">{product.priceLabel}</span>
                       <GlassButton onClick={() => setCheckoutProduct(product)} className="px-4 sm:px-5 py-2 sm:py-2.5 text-sm">Inquire</GlassButton>

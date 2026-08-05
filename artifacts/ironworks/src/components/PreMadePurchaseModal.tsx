@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle, ExternalLink, X } from "lucide-react";
 import { GlassButton } from "./GlassButton";
+import { FormattedDescription } from "./FormattedDescription";
 import { useToast } from "@/hooks/use-toast";
 import { PreMadeItem } from "@/data/premade-items";
 import { saveOrder } from "@/hooks/useAdminProducts";
@@ -167,7 +168,10 @@ export function PreMadePurchaseModal({ item, isOpen, onClose }: PreMadePurchaseM
                       <img src={item.image} alt={item.alt} className="w-full h-full object-cover" />
                     </div>
                     <h2 className="font-display text-2xl uppercase tracking-widest text-white mb-2">{item.title}</h2>
-                    <p className="text-white/50 text-sm font-sans leading-relaxed mb-5">{item.description}</p>
+                    <FormattedDescription
+                      text={item.description}
+                      className="text-white/50 text-sm font-sans leading-relaxed mb-5 space-y-3"
+                    />
                     <div className="flex items-end justify-between gap-4 pt-5 border-t border-white/10">
                       <span className="text-white/35 text-sm font-sans">Current price</span>
                       <span className="font-display text-2xl text-forge-gradient text-right">{item.priceLabel}</span>

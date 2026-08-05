@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { GlassButton } from './GlassButton';
+import { FormattedDescription } from './FormattedDescription';
 import { PremiumProduct } from '../data/premium-products';
 import { useToast } from '@/hooks/use-toast';
 import { saveOrder } from '@/hooks/useAdminProducts';
@@ -86,7 +87,10 @@ export function CheckoutModal({ product, isOpen, onClose }: CheckoutModalProps) 
                       }
                     </div>
                     <h2 className="font-display text-xl text-white uppercase tracking-wider mb-2">{product.title}</h2>
-                    <p className="text-white/45 text-sm font-sans mb-6 flex-1">{product.description}</p>
+                    <FormattedDescription
+                      text={product.description}
+                      className="text-white/45 text-sm font-sans mb-6 flex-1 space-y-3"
+                    />
                     <div className="pt-5 flex justify-between items-end" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
                       <span className="text-white/35 text-sm font-sans">Listed price</span>
                       <span className="font-display text-2xl text-forge-gradient">{product.priceLabel}</span>

@@ -4,6 +4,7 @@ import { ArrowLeft, CheckCircle, Phone, X } from 'lucide-react';
 import { useLocation, useParams } from 'wouter';
 import { Navigation } from '@/components/Navigation';
 import { FloatingContactBanner } from '@/components/FloatingContactBanner';
+import { FormattedDescription } from '@/components/FormattedDescription';
 import { Embers } from '@/components/Embers';
 import { GlassButton } from '@/components/GlassButton';
 import { PreMadePurchaseModal } from '@/components/PreMadePurchaseModal';
@@ -77,9 +78,10 @@ export function PreMadeDetailPage() {
               <h1 className="font-display text-5xl md:text-7xl tracking-widest uppercase leading-none text-white mb-6">
                 {item.title}
               </h1>
-              <p className="text-white/60 font-sans font-light leading-relaxed text-lg max-w-xl mb-7">
-                {item.description}
-              </p>
+              <FormattedDescription
+                text={item.description}
+                className="text-white/60 font-sans font-light leading-relaxed text-lg max-w-xl mb-7 space-y-4"
+              />
               <div className="mb-8 flex flex-wrap gap-2">
                 {item.features.map((feature) => (
                   <span
