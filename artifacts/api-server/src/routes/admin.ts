@@ -13,6 +13,7 @@ const mimeExtensions: Record<string, string> = {
   "image/png": "png",
   "image/webp": "webp",
 };
+const uploadedImagePattern = /^[a-z0-9-]+\.(?:jpg|jpeg|png|webp)$/i;
 
 function cleanName(value: unknown) {
   return String(value ?? "upload")
@@ -71,6 +72,20 @@ router.put("/admin/premade-products", async (req, res) => {
   }
 });
 
+router.get("/admin/images/:filename", async (req, res) => {
+  const filename = String(req.params.filename ?? "");
+  if (!uploadedImagePattern.test(filename)) {
+    res.status(404).json({ ok: false, error: "Image not found." });
+    return;
+  }
+
+  res.sendFile(path.join(adminUploadDir(), filename), error => {
+    if (error && !res.headersSent) {
+      res.status(404).json({ ok: false, error: "Image not found." });
+    }
+  });
+});
+
 router.post("/admin/images", async (req, res) => {
   try {
     const image = String(req.body?.image ?? "");
@@ -94,7 +109,7 @@ router.post("/admin/images", async (req, res) => {
     const filename = `${cleanName(req.body?.filename)}-${Date.now()}-${randomUUID().slice(0, 8)}.${ext}`;
     await writeFile(path.join(uploadDir, filename), buffer);
 
-    res.json({ ok: true, url: `/images/admin-uploads/${filename}` });
+    res.json({ ok: true, url: `/api/admin/images/${filename}` });
   } catch (error) {
     res.status(500).json({ ok: false, error: error instanceof Error ? error.message : "Could not save image." });
   }

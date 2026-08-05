@@ -155,10 +155,17 @@ function stripPreMadeBrowserStoredImages(product: PreMadeItem): PreMadeItem {
   };
 }
 
+function isAdminUploadedImage(value: string | undefined) {
+  return typeof value === 'string' && (
+    value.startsWith('/api/admin/images/') ||
+    value.startsWith('/images/admin-uploads/')
+  );
+}
+
 // ── Image upload helper ──────────────────────────────────────────
 function ImageField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [mode, setMode] = useState<'url' | 'file'>(value.startsWith('data:') ? 'file' : 'url');
+  const [mode, setMode] = useState<'url' | 'file'>(value.startsWith('data:') || isAdminUploadedImage(value) ? 'file' : 'url');
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -167,7 +174,9 @@ function ImageField({ value, onChange }: { value: string; onChange: (v: string) 
     setUploading(true);
     setUploadError('');
     try {
-      onChange(await optimizeImageFile(file));
+      const uploadedUrl = await optimizeImageFile(file);
+      onChange(uploadedUrl);
+      setMode('file');
     } catch (error) {
       setUploadError(adminSaveErrorMessage(error));
     } finally {
@@ -199,10 +208,10 @@ function ImageField({ value, onChange }: { value: string; onChange: (v: string) 
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm text-white/50 hover:text-white transition-colors w-full"
             style={iStyle}>
             <Upload size={14} />
-            {uploading ? 'Optimizing image...' : value.startsWith('data:') ? 'Image uploaded — click to replace' : 'Choose image file'}
+            {uploading ? 'Uploading image...' : value ? 'Image uploaded - click to replace' : 'Choose image file'}
           </button>
           {uploadError && <p className="mt-2 text-xs text-red-300/80 font-sans">{uploadError}</p>}
-          {value.startsWith('data:') && (
+          {value && (
             <img src={value} alt="preview" className="mt-2 h-20 w-20 object-cover rounded-lg border border-white/10" />
           )}
         </div>
@@ -463,7 +472,7 @@ function PreMadeForm({
             </div>
           ) : (
             gallery.map((image, index) => (
-              <div key={`${image.src}-${index}`} className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div key={`premade-gallery-${index}`} className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <div className="grid grid-cols-1 md:grid-cols-[7rem_1fr_auto] gap-3">
                   <div className="aspect-[4/3] overflow-hidden rounded-lg bg-white/[0.04] border border-white/10">
                     {image.src ? (
@@ -680,7 +689,7 @@ function ServiceImagesPanel({
                         updateService({ ...service, gallery: updated });
                       };
                       return (
-                        <div key={`${image.src}-${index}`} className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div key={`service-gallery-${service.slug}-${index}`} className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)' }}>
                           <div className="grid grid-cols-1 gap-3">
                             <div className="aspect-[4/3] overflow-hidden rounded-lg bg-white/[0.04] border border-white/10">
                               {image.src ? (
