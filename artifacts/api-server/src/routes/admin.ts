@@ -1,12 +1,17 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { Router } from "express";
-import { adminDataDir, adminUploadDir } from "../lib/upload-dir";
+import {
+  adminImageExists,
+  adminStorageBackend,
+  readAdminImage,
+  readProductData,
+  verifyAdminStorage,
+  writeAdminImage,
+  writeProductData,
+} from "../lib/admin-storage";
 
 const router = Router();
 const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
-const preMadeProductsPath = () => path.join(adminDataDir(), "premade-products.json");
 
 const mimeExtensions: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -26,7 +31,7 @@ function cleanName(value: unknown) {
 
 async function readPreMadeProducts() {
   try {
-    const raw = await readFile(preMadeProductsPath(), "utf8");
+    const raw = await readProductData();
     const parsed = JSON.parse(raw) as unknown;
     if (Array.isArray(parsed)) return parsed;
     if (parsed && typeof parsed === "object" && Array.isArray((parsed as { products?: unknown }).products)) {
@@ -44,7 +49,7 @@ function validatePreMadeProducts(value: unknown) {
   }
 
   const serialized = JSON.stringify(value);
-  if (serialized.includes("data:image/")) {
+  if (serialized.includes("data:image/") || serialized.includes("data:application/octet-stream;base64,")) {
     throw new Error("Uploaded photos must be saved as site image files before saving products.");
   }
 
@@ -59,13 +64,7 @@ router.get("/admin/premade-products", async (_req, res) => {
 router.put("/admin/premade-products", async (req, res) => {
   try {
     const products = validatePreMadeProducts(req.body?.products);
-    const dataDir = adminDataDir();
-    await mkdir(dataDir, { recursive: true });
-    await writeFile(
-      preMadeProductsPath(),
-      JSON.stringify({ products, updatedAt: new Date().toISOString() }, null, 2),
-      "utf8",
-    );
+    await writeProductData(JSON.stringify({ products, updatedAt: new Date().toISOString() }, null, 2));
     res.json({ ok: true, products });
   } catch (error) {
     res.status(400).json({ ok: false, error: error instanceof Error ? error.message : "Could not save pre-made products." });
@@ -79,11 +78,51 @@ router.get("/admin/images/:filename", async (req, res) => {
     return;
   }
 
-  res.sendFile(path.join(adminUploadDir(), filename), error => {
-    if (error && !res.headersSent) {
-      res.status(404).json({ ok: false, error: "Image not found." });
+  try {
+    const image = await readAdminImage(filename);
+    const extension = filename.split(".").pop()?.toLowerCase();
+    const contentType = extension === "png" ? "image/png" : extension === "webp" ? "image/webp" : "image/jpeg";
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    res.send(image);
+  } catch {
+    res.status(404).json({ ok: false, error: "Image not found." });
+  }
+});
+
+router.get("/admin/storage-status", async (_req, res) => {
+  try {
+    const storage = await verifyAdminStorage();
+    const products = await readPreMadeProducts();
+    const referenced = new Set<string>();
+    const collect = (value: unknown) => {
+      const match = String(value ?? "").match(/\/(?:api\/admin\/images|images\/admin-uploads)\/([^/?#]+)/);
+      if (match?.[1] && uploadedImagePattern.test(match[1])) referenced.add(match[1]);
+    };
+
+    for (const product of products as Array<Record<string, any>>) {
+      collect(product.image);
+      for (const image of product.gallery ?? []) collect(image?.src);
+      collect(product.video?.poster);
+      for (const video of product.videos ?? []) collect(video?.poster);
     }
-  });
+
+    const checks = await Promise.all([...referenced].map(async filename => ({ filename, exists: await adminImageExists(filename) })));
+    res.json({
+      ok: true,
+      backend: adminStorageBackend(),
+      objectCount: storage.objectCount,
+      referencedImages: checks.length,
+      availableImages: checks.filter(item => item.exists).length,
+      missingImages: checks.filter(item => !item.exists).map(item => item.filename),
+    });
+  } catch (error) {
+    res.status(503).json({
+      ok: false,
+      backend: adminStorageBackend(),
+      error: error instanceof Error ? error.message : "Could not inspect admin storage.",
+    });
+  }
 });
 
 router.post("/admin/images", async (req, res) => {
@@ -102,12 +141,9 @@ router.post("/admin/images", async (req, res) => {
       return;
     }
 
-    const uploadDir = adminUploadDir();
-    await mkdir(uploadDir, { recursive: true });
-
     const ext = mimeExtensions[mime] ?? "jpg";
     const filename = `${cleanName(req.body?.filename)}-${Date.now()}-${randomUUID().slice(0, 8)}.${ext}`;
-    await writeFile(path.join(uploadDir, filename), buffer);
+    await writeAdminImage(filename, buffer);
 
     res.json({ ok: true, url: `/api/admin/images/${filename}` });
   } catch (error) {

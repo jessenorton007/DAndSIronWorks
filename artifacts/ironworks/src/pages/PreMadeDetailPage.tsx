@@ -5,10 +5,12 @@ import { useLocation, useParams } from 'wouter';
 import { Navigation } from '@/components/Navigation';
 import { FloatingContactBanner } from '@/components/FloatingContactBanner';
 import { FormattedDescription } from '@/components/FormattedDescription';
+import { ResilientImage } from '@/components/ResilientImage';
 import { Embers } from '@/components/Embers';
 import { GlassButton } from '@/components/GlassButton';
 import { PreMadePurchaseModal } from '@/components/PreMadePurchaseModal';
 import { usePreMadeProducts } from '@/hooks/useAdminProducts';
+import { getPreMadeItem as getFallbackPreMadeItem } from '@/data/premade-items';
 import { useSeo } from '@/lib/seo';
 import NotFound from './not-found';
 
@@ -17,6 +19,7 @@ export function PreMadeDetailPage() {
   const [, navigate] = useLocation();
   const { products } = usePreMadeProducts();
   const item = products.find((product) => product.id === params.id);
+  const fallbackItem = getFallbackPreMadeItem(params.id);
   const [purchaseOpen, setPurchaseOpen] = useState(false);
   const [expandedImage, setExpandedImage] = useState<{ src: string; alt: string } | null>(null);
   const returnToPreMade = () => {
@@ -120,7 +123,7 @@ export function PreMadeDetailPage() {
                 className="h-full w-full cursor-zoom-in"
                 aria-label={`Enlarge ${item.title} photo`}
               >
-                <img src={item.image} alt={item.alt} className="w-full h-full object-cover" />
+                <ResilientImage src={item.image} fallbackSrc={fallbackItem?.image} alt={item.alt} className="w-full h-full object-cover" />
               </button>
               <div className="absolute inset-0 bg-gradient-to-t from-black/52 via-transparent to-transparent pointer-events-none" />
             </motion.div>
@@ -155,7 +158,7 @@ export function PreMadeDetailPage() {
                 Gallery
               </h2>
               <div className="grid grid-cols-2 gap-3">
-                {item.gallery.map((image) => (
+                {item.gallery.map((image, index) => (
                   <button
                     key={image.src}
                     type="button"
@@ -164,7 +167,7 @@ export function PreMadeDetailPage() {
                     style={{ border: '1px solid rgba(255,255,255,0.08)' }}
                     aria-label={`Enlarge ${image.alt}`}
                   >
-                    <img src={image.src} alt={image.alt} className="w-full h-full object-cover" />
+                    <ResilientImage src={image.src} fallbackSrc={fallbackItem?.gallery[index]?.src ?? fallbackItem?.gallery[0]?.src} alt={image.alt} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>

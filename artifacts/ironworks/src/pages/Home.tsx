@@ -6,13 +6,14 @@ import { Navigation } from "@/components/Navigation";
 import { Embers } from "@/components/Embers";
 import { GlassButton } from "@/components/GlassButton";
 import { FormattedDescription } from "@/components/FormattedDescription";
+import { ResilientImage } from "@/components/ResilientImage";
 import { CheckoutModal } from "@/components/CheckoutModal";
 import { PreMadePurchaseModal } from "@/components/PreMadePurchaseModal";
 import { FloatingContactBanner } from "@/components/FloatingContactBanner";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useAdminServices, useEtsyProducts, usePremiumProducts, usePreMadeProducts } from "@/hooks/useAdminProducts";
 import { PremiumProduct } from "@/data/premium-products";
-import { PreMadeItem } from "@/data/premade-items";
+import { PreMadeItem, preMadeItems as fallbackPreMadeItems } from "@/data/premade-items";
 import { useSeo } from "@/lib/seo";
 
 const processVideos = [
@@ -150,6 +151,7 @@ function PreMadeItemCard({
   onDetails: () => void;
 }) {
   const isFirePit = item.id === 'pre-built-fire-pits';
+  const fallbackItem = fallbackPreMadeItems.find(candidate => candidate.id === item.id);
 
   if (isFirePit) {
     return (
@@ -165,8 +167,9 @@ function PreMadeItemCard({
         <div className="grid lg:grid-cols-[minmax(0,1.22fr)_minmax(22rem,0.78fr)] gap-0">
           <div className="p-4 sm:p-5 lg:p-6">
             <div className="relative aspect-[16/10] min-h-[18rem] rounded-xl overflow-hidden bg-black mb-4" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
-              <img
+              <ResilientImage
                 src={item.image}
+                fallbackSrc={fallbackItem?.image}
                 alt={item.alt}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
@@ -205,9 +208,9 @@ function PreMadeItemCard({
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              {item.gallery.map((image) => (
+              {item.gallery.map((image, index) => (
                 <div key={image.src} className="aspect-[4/3] rounded-lg overflow-hidden bg-black/50" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <img src={image.src} alt={image.alt} className="w-full h-full object-cover" />
+                  <ResilientImage src={image.src} fallbackSrc={fallbackItem?.gallery[index]?.src ?? fallbackItem?.gallery[0]?.src} alt={image.alt} className="w-full h-full object-cover" />
                 </div>
               ))}
             </div>
@@ -253,8 +256,9 @@ function PreMadeItemCard({
     >
       <div className="grid sm:grid-cols-[minmax(0,1.1fr)_minmax(0,0.8fr)] gap-0">
         <div className="relative min-h-[18rem] sm:min-h-[24rem] overflow-hidden bg-black">
-          <img
+          <ResilientImage
             src={item.image}
+            fallbackSrc={fallbackItem?.image}
             alt={item.alt}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
@@ -274,9 +278,9 @@ function PreMadeItemCard({
             className="text-white/58 text-sm font-sans leading-relaxed space-y-3"
           />
           <div className="grid grid-cols-2 gap-3">
-            {item.gallery.map((image) => (
+            {item.gallery.map((image, index) => (
               <div key={image.src} className="aspect-[4/3] rounded-lg overflow-hidden bg-black/50" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
-                <img src={image.src} alt={image.alt} className="w-full h-full object-cover" />
+                <ResilientImage src={image.src} fallbackSrc={fallbackItem?.gallery[index]?.src ?? fallbackItem?.gallery[0]?.src} alt={image.alt} className="w-full h-full object-cover" />
               </div>
             ))}
           </div>

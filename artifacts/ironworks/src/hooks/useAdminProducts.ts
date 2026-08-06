@@ -10,6 +10,10 @@ const PREMADE_KEY = 'ds_premade_products_v1';
 const SERVICES_KEY = 'ds_services_v2';
 const ORDERS_KEY = 'ds_orders';
 const INQUIRIES_KEY = 'ds_inquiries';
+const LOST_RUNTIME_IMAGES = new Set([
+  'codex-image-aug-4-2026-02-19-25-pm-1785962926133-3bb539fa.jpg',
+  'setema-img-jpg-1785962934106-d5033425.jpg',
+]);
 
 export interface Order {
   id: string;
@@ -81,6 +85,31 @@ function isBrowserStoredImage(value: string | undefined) {
   return typeof value === 'string' && value.startsWith('data:image/');
 }
 
+function isLostRuntimeImage(value: string | undefined) {
+  if (!value) return false;
+  const filename = value.split('/').pop()?.split(/[?#]/)[0];
+  return Boolean(filename && LOST_RUNTIME_IMAGES.has(filename));
+}
+
+function recoverLostPreMadeImages(product: PreMadeItem): PreMadeItem {
+  const fallback = defaultPreMadeItems.find(item => item.id === product.id);
+  const gallery = (product.gallery ?? []).filter(image => !isLostRuntimeImage(image.src));
+  const hasTemporaryTestCopy = product.id === 'pre-built-fire-pits' && /testt?\s+test/i.test(product.description);
+  return {
+    ...product,
+    description: hasTemporaryTestCopy ? fallback?.description ?? product.description : product.description,
+    image: isLostRuntimeImage(product.image) ? fallback?.image ?? '' : product.image,
+    gallery: gallery.length > 0 ? gallery : fallback?.gallery ?? [],
+    video: product.video
+      ? { ...product.video, poster: isLostRuntimeImage(product.video.poster) ? fallback?.video?.poster ?? '' : product.video.poster }
+      : undefined,
+    videos: product.videos?.map((video, index) => ({
+      ...video,
+      poster: isLostRuntimeImage(video.poster) ? fallback?.videos?.[index]?.poster ?? '' : video.poster,
+    })),
+  };
+}
+
 function stripBrowserStoredPreMadeImages(product: PreMadeItem): PreMadeItem {
   return {
     ...product,
@@ -99,7 +128,9 @@ function stripBrowserStoredPreMadeImages(product: PreMadeItem): PreMadeItem {
 }
 
 function readLocalPreMadeProducts() {
-  return readStorage<PreMadeItem[]>(PREMADE_KEY, defaultPreMadeItems).map(stripBrowserStoredPreMadeImages);
+  return readStorage<PreMadeItem[]>(PREMADE_KEY, defaultPreMadeItems)
+    .map(stripBrowserStoredPreMadeImages)
+    .map(recoverLostPreMadeImages);
 }
 
 async function readServerPreMadeProducts() {
@@ -108,7 +139,7 @@ async function readServerPreMadeProducts() {
   if (!response.ok || result?.ok === false || !Array.isArray(result?.products)) {
     throw new Error(result?.error || 'Could not load server pre-made products.');
   }
-  return result.products as PreMadeItem[];
+  return (result.products as PreMadeItem[]).map(recoverLostPreMadeImages);
 }
 
 async function saveServerPreMadeProducts(products: PreMadeItem[]) {
@@ -227,17 +258,8 @@ export function usePreMadeProducts() {
   }, []);
 
   const setProducts = useCallback(async (updated: PreMadeItem[]) => {
-    const cleaned = updated.map(stripBrowserStoredPreMadeImages);
-
-    try {
-      await saveServerPreMadeProducts(cleaned);
-    } catch (serverError) {
-      writeStorage(PREMADE_KEY, cleaned);
-      setProductsState(cleaned);
-      console.warn('Pre-made products saved in browser fallback because server save failed.', serverError);
-      return;
-    }
-
+    const cleaned = updated.map(stripBrowserStoredPreMadeImages).map(recoverLostPreMadeImages);
+    await saveServerPreMadeProducts(cleaned);
     mirrorStorage(PREMADE_KEY, cleaned);
     setProductsState(cleaned);
   }, []);

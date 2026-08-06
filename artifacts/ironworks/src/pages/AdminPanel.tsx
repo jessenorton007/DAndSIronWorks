@@ -16,6 +16,8 @@ import { PremiumProduct } from '@/data/premium-products';
 import { PreMadeItem } from '@/data/premade-items';
 import { ServicePage } from '@/data/services';
 import { AnalyticsTab } from './AnalyticsTab';
+import { ResilientImage } from '@/components/ResilientImage';
+import { preMadeItems as fallbackPreMadeItems } from '@/data/premade-items';
 
 const SESSION_KEY = 'ds_admin_auth';
 
@@ -23,6 +25,15 @@ type Tab = 'overview' | 'premade' | 'services' | 'etsy' | 'premium' | 'inquiries
 
 const SETTINGS_KEY = 'ds_site_settings';
 interface SiteSettings { phone: string; email: string; facebook: string; }
+type AdminStorageStatus = {
+  ok: boolean;
+  backend?: string;
+  objectCount?: number;
+  referencedImages?: number;
+  availableImages?: number;
+  missingImages?: string[];
+  error?: string;
+};
 const defaultSettings: SiteSettings = { phone: '(435) 421-9033', email: 'dandsiron@yahoo.com', facebook: '@DallanGoffBlacksmith' };
 function getSettings(): SiteSettings {
   try { const s = localStorage.getItem(SETTINGS_KEY); return s ? JSON.parse(s) : defaultSettings; } catch { return defaultSettings; }
@@ -81,7 +92,7 @@ async function optimizeImageFile(file: File) {
 }
 
 async function compactImageDataUrl(raw: string) {
-  if (!raw.startsWith('data:image/')) return raw;
+  if (!/^data:(?:image\/[^;]+|application\/octet-stream);base64,/i.test(raw)) return raw;
   const image = await loadImage(raw).catch(() => null);
   if (!image) return raw;
 
@@ -99,7 +110,7 @@ async function compactImageDataUrl(raw: string) {
 }
 
 async function compactAndStoreImage(raw: string, filename = 'admin-image') {
-  if (!raw.startsWith('data:image/')) return raw;
+  if (!/^data:(?:image\/[^;]+|application\/octet-stream);base64,/i.test(raw)) return raw;
   const compacted = await compactImageDataUrl(raw);
   return uploadAdminImage(compacted, filename);
 }
@@ -127,7 +138,7 @@ function adminSaveErrorMessage(error: unknown) {
 }
 
 function isBrowserStoredImage(value: string | undefined) {
-  return typeof value === 'string' && value.startsWith('data:image/');
+  return typeof value === 'string' && /^data:(?:image\/[^;]+|application\/octet-stream);base64,/i.test(value);
 }
 
 function preMadeHasBrowserStoredImages(product: PreMadeItem) {
@@ -753,6 +764,7 @@ export function AdminPanel() {
   const [preMadeModal, setPreMadeModal] = useState<{ open: boolean; editing: PreMadeItem | null }>({ open: false, editing: null });
   const [confirm, setConfirm] = useState<{ msg: string; onConfirm: () => void } | null>(null);
   const [saveError, setSaveError] = useState('');
+  const [storageStatus, setStorageStatus] = useState<AdminStorageStatus | null>(null);
 
   const [settings, setSettings] = useState<SiteSettings>(getSettings());
   const [settingsSaved, setSettingsSaved] = useState(false);
@@ -760,6 +772,20 @@ export function AdminPanel() {
   useEffect(() => {
     if (sessionStorage.getItem(SESSION_KEY) !== '1') navigate('/');
   }, [navigate]);
+
+  useEffect(() => {
+    if (tab !== 'premade') return;
+    let cancelled = false;
+    fetch('/api/admin/storage-status')
+      .then(async response => {
+        const result = await response.json().catch(() => ({}));
+        if (!cancelled) setStorageStatus({ ...result, ok: response.ok && result?.ok !== false });
+      })
+      .catch(() => {
+        if (!cancelled) setStorageStatus({ ok: false, error: 'The storage API is not reachable.' });
+      });
+    return () => { cancelled = true; };
+  }, [tab, preMadeProducts]);
 
   const logout = () => {
     sessionStorage.removeItem(SESSION_KEY);
@@ -920,6 +946,29 @@ export function AdminPanel() {
                   </button>
                 }
               />
+              {storageStatus && (
+                <div
+                  className="rounded-xl p-4 mb-6"
+                  style={{
+                    background: storageStatus.ok && !storageStatus.missingImages?.length ? 'rgba(34,197,94,0.07)' : 'rgba(239,68,68,0.08)',
+                    border: storageStatus.ok && !storageStatus.missingImages?.length ? '1px solid rgba(74,222,128,0.2)' : '1px solid rgba(248,113,113,0.22)',
+                  }}
+                >
+                  <p className="font-display uppercase tracking-widest text-sm text-white/80 mb-1">
+                    {storageStatus.ok ? 'Persistent Storage Connected' : 'Persistent Storage Needs Attention'}
+                  </p>
+                  <p className="text-sm text-white/55 font-sans leading-relaxed">
+                    {storageStatus.ok
+                      ? `${storageStatus.backend === 'replit-app-storage' ? 'Replit App Storage' : 'Local development storage'} is active. ${storageStatus.availableImages ?? 0} of ${storageStatus.referencedImages ?? 0} uploaded product images are available.`
+                      : storageStatus.error || 'The storage service could not be reached.'}
+                  </p>
+                  {!!storageStatus.missingImages?.length && (
+                    <p className="mt-2 break-all text-xs text-red-200/70 font-sans">
+                      Missing files: {storageStatus.missingImages.join(', ')}
+                    </p>
+                  )}
+                </div>
+              )}
               <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(255,140,26,0.06)', border: '1px solid rgba(255,140,26,0.18)' }}>
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <p className="text-sm text-orange-100/75 font-sans leading-relaxed">
@@ -947,7 +996,7 @@ export function AdminPanel() {
                   {preMadeProducts.map(p => (
                     <div key={p.id} className="rounded-xl overflow-hidden flex flex-col" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
                       <div className="aspect-[4/3] overflow-hidden bg-white/5">
-                        {p.image ? <img src={p.image} alt={p.alt || p.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Flame size={32} className="text-white/15" /></div>}
+                        {p.image ? <ResilientImage src={p.image} fallbackSrc={fallbackPreMadeItems.find(item => item.id === p.id)?.image} alt={p.alt || p.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Flame size={32} className="text-white/15" /></div>}
                       </div>
                       <div className="p-4 flex flex-col flex-1">
                         <div className="flex items-start justify-between gap-3 mb-1">

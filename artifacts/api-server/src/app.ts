@@ -6,7 +6,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import router from "./routes";
 import { logger } from "./lib/logger";
-import { adminUploadDir } from "./lib/upload-dir";
 
 const app: Express = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -35,7 +34,9 @@ app.use(express.json({ limit: "12mb" }));
 app.use(express.urlencoded({ extended: true, limit: "12mb" }));
 
 app.use("/api", router);
-app.use("/images/admin-uploads", express.static(adminUploadDir()));
+app.get("/images/admin-uploads/:filename", (req, res) => {
+  res.redirect(301, `/api/admin/images/${encodeURIComponent(String(req.params.filename ?? ""))}`);
+});
 
 const staticRoot = process.env["IRONWORKS_DIST_PATH"] || path.resolve(__dirname, "../../ironworks/dist/public");
 if (existsSync(staticRoot)) {
