@@ -13,7 +13,13 @@ function appStorageEnabled() {
 
 let client: Client | undefined;
 function appStorageClient() {
-  client ??= new Client();
+  const bucketId = process.env["DEFAULT_OBJECT_STORAGE_BUCKET_ID"];
+  if (!bucketId) {
+    throw new Error(
+      "Replit App Storage is not configured. DEFAULT_OBJECT_STORAGE_BUCKET_ID is missing.",
+    );
+  }
+  client ??= new Client({ bucketId });
   return client;
 }
 
